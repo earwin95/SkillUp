@@ -2,45 +2,21 @@
 
 {% block title %}Accueil{% endblock %}
 
-{% block stylesheets %}
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 2rem;
-            background-color: #f7f7f7;
-        }
-
-        h1 {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-        }
-
-        .links {
-            margin-top: 2rem;
-        }
-
-        .links a {
-            display: inline-block;
-            margin-right: 1rem;
-            padding: 0.5rem 1rem;
-            background: #3498db;
-            color: white;
-            border-radius: 6px;
-            text-decoration: none;
-        }
-
-        .links a:hover {
-            background-color: #2980b9;
-        }
-    </style>
-{% endblock %}
-
 {% block body %}
-    <h1>Bienvenue sur SkillUp 👋</h1>
-    <p>Échange de compétences entre utilisateurs.</p>
+    <h1>Bienvenue sur <strong>SkillUp</strong> 👋</h1>
+
+    <p>
+        SkillUp est une plateforme d’échange de compétences entre utilisateurs.  
+        Tu peux proposer ton savoir-faire et apprendre gratuitement grâce aux autres membres.
+    </p>
 
     <div class="links">
-        <a href="{{ path('user_skill_new') }}">➕ Ajouter une compétence</a>
-        <a href="{{ path('user_skill_index') }}">📋 Voir les compétences</a>
+        {% if app.user %}
+            <a href="{{ path('user_skill_new') }}" class="btn">➕ Ajouter une compétence</a>
+            <a href="{{ path('user_skill_index') }}" class="btn">📋 Voir les compétences</a>
+        {% else %}
+            <a href="{{ path('app_login') }}" class="btn">🔑 Se connecter</a>
+            <a href="{{ path('app_register') }}" class="btn">📝 S’inscrire</a>
+        {% endif %}
     </div>
 {% endblock %}
