@@ -1,0 +1,46 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Accueil{% endblock %}
+
+{% block stylesheets %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 2rem;
+            background-color: #f7f7f7;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .links {
+            margin-top: 2rem;
+        }
+
+        .links a {
+            display: inline-block;
+            margin-right: 1rem;
+            padding: 0.5rem 1rem;
+            background: #3498db;
+            color: white;
+            border-radius: 6px;
+            text-decoration: none;
+        }
+
+        .links a:hover {
+            background-color: #2980b9;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <h1>Bienvenue sur SkillUp 👋</h1>
+    <p>Échange de compétences entre utilisateurs.</p>
+
+    <div class="links">
+        <a href="{{ path('user_skill_new') }}">➕ Ajouter une compétence</a>
+        <a href="{{ path('user_skill_index') }}">📋 Voir les compétences</a>
+    </div>
+{% endblock %}
