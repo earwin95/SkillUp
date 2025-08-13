@@ -1,84 +1,88 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Liste des Compétences{% endblock %}
+{% block title %}Liste des Compétences
+{% endblock %}
 
 {% block stylesheets %}
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 2rem;
-            background-color: #f9f9f9;
-        }
+	<style>
+		body {
+			font-family: Arial, sans-serif;
+			padding: 2rem;
+			background-color: #f9f9f9;
+		}
 
-        h1 {
-            margin-bottom: 1rem;
-        }
+		h1 {
+			margin-bottom: 1rem;
+		}
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-            box-shadow: 0 0 10px rgba(0,0,0,0.05);
-            border-radius: 10px;
-            overflow: hidden;
-        }
+		table {
+			width: 100%;
+			border-collapse: collapse;
+			background: white;
+			box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+			border-radius: 10px;
+			overflow: hidden;
+		}
 
-        th, td {
-            padding: 1rem;
-            text-align: left;
-            border-bottom: 1px solid #eee;
-        }
+		th,
+		td {
+			padding: 1rem;
+			text-align: left;
+			border-bottom: 1px solid #eee;
+		}
 
-        th {
-            background-color: #f0f0f0;
-        }
+		th {
+			background-color: #f0f0f0;
+		}
 
-        tr:hover {
-            background-color: #f9f9f9;
-        }
+		tr:hover {
+			background-color: #f9f9f9;
+		}
 
-        .btn-secondary {
-            display: inline-block;
-            margin-top: 1.5rem;
-            color: #555;
-            text-decoration: none;
-            border: 1px solid #ccc;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-        }
+		.btn-secondary {
+			display: inline-block;
+			margin-top: 1.5rem;
+			color: #555;
+			text-decoration: none;
+			border: 1px solid #ccc;
+			padding: 0.5rem 1rem;
+			border-radius: 6px;
+		}
 
-        .btn-secondary:hover {
-            background-color: #eee;
-        }
-    </style>
+		.btn-secondary:hover {
+			background-color: #eee;
+		}
+	</style>
 {% endblock %}
 
 {% block body %}
-    <h1>Liste des compétences déclarées</h1>
+	<h1>Liste de mes compétences</h1>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Compétence</th>
-                <th>Niveau</th>
-                <th>Notes</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for userSkill in user_skills %}
-                <tr>
-                    <td>{{ userSkill.skill.name }}</td>
-                    <td>{{ userSkill.level.value }}</td>
-                    <td>{{ userSkill.notes ?: '-' }}</td>
-                </tr>
-            {% else %}
-                <tr>
-                    <td colspan="3">Aucune compétence enregistrée.</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+	<table>
+		<thead>
+			<tr>
+				<th>Compétence</th>
+				<th>Niveau</th>
+				<th>Notes</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for userSkill in user_skills %}
+				<tr>
+					<td>{{ userSkill.skill.name }}</td>
+					<td>{{ userSkill.level.value }}</td>
+					<td>{{ userSkill.notes ?: '-' }}</td>
+				</tr>
+			{% else %}
+				<tr>
+					<td colspan="3">Aucune compétence enregistrée.</td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
 
-    <a href="{{ path('user_skill_index') }}" class="btn-secondary">← Retour à la liste</a>
+	<a href="{{ path('app_home') }}" class="text-blue-600 hover:underline">
+		← Retour à l'accueil
+	</a>
 
 {% endblock %}
