@@ -9,10 +9,13 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
-#[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
+#[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', columns: ['email'])]
+#[UniqueEntity(fields: ['email'], message: 'Cet email est déjà utilisé.')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -20,15 +23,22 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?int $id = null;
 
+    #[Assert\NotBlank]
+    #[Assert\Email]
+    #[Assert\Length(max: 180)]
     #[ORM\Column(length: 180)]
     private ?string $email = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: Types::JSON)]
     private array $roles = [];
 
+    #[Assert\NotBlank]
+    #[Assert\Length(min: 8)]
     #[ORM\Column]
     private ?string $password = null;
 
+    #[Assert\NotBlank]
+    #[Assert\Length(min: 3, max: 100)]
     #[ORM\Column(length: 100)]
     private ?string $username = null;
 
@@ -38,8 +48,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Offer::class, mappedBy: 'owner')]
     private Collection $offers;
 
-    #[ORM\ManyToMany(targetEntity: Skill::class, mappedBy: 'users')]
-    private Collection $skills;
+    // SUPPRIMÉ: ManyToMany $skills (on passe par UserSkill)
+    // #[ORM\ManyToMany(targetEntity: Skill::class, mappedBy: 'users')]
+    // private Collection $skills;
 
     #[ORM\OneToMany(mappedBy: 'requester', targetEntity: ExchangeRequest::class)]
     private Collection $exchangeRequests;
@@ -50,13 +61,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'targetUser', targetEntity: Review::class)]
     private Collection $reviewsReceived;
 
+    /** @var Collection<int, UserSkill> */
+    #[ORM\OneToMany(targetEntity: UserSkill::class, mappedBy: 'user')]
+    private Collection $userSkills;
+
     public function __construct()
     {
         $this->offers = new ArrayCollection();
-        $this->skills = new ArrayCollection();
         $this->exchangeRequests = new ArrayCollection();
         $this->reviewsWritten = new ArrayCollection();
         $this->reviewsReceived = new ArrayCollection();
+        $this->userSkills = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -104,17 +119,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function __serialize(): array
-    {
-        $data = (array) $this;
-        $data["\0" . self::class . "\0password"] = hash('crc32c', $this->password);
-        return $data;
-    }
-
-    #[\Deprecated]
     public function eraseCredentials(): void
     {
-        // @deprecated, to be removed when upgrading to Symfony 8
+        // $this->plainPassword = null; // si tu en utilises un
     }
 
     public function getUsername(): ?string
@@ -139,6 +146,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    /** @return Collection<int, Offer> */
     public function getOffers(): Collection
     {
         return $this->offers;
@@ -163,28 +171,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getSkills(): Collection
-    {
-        return $this->skills;
-    }
-
-    public function addSkill(Skill $skill): static
-    {
-        if (!$this->skills->contains($skill)) {
-            $this->skills->add($skill);
-            $skill->addUser($this);
-        }
-        return $this;
-    }
-
-    public function removeSkill(Skill $skill): static
-    {
-        if ($this->skills->removeElement($skill)) {
-            $skill->removeUser($this);
-        }
-        return $this;
-    }
-
+    /** @return Collection<int, ExchangeRequest> */
     public function getExchangeRequests(): Collection
     {
         return $this->exchangeRequests;
@@ -209,6 +196,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    /** @return Collection<int, Review> */
     public function getReviewsWritten(): Collection
     {
         return $this->reviewsWritten;
@@ -233,6 +221,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    /** @return Collection<int, Review> */
     public function getReviewsReceived(): Collection
     {
         return $this->reviewsReceived;
@@ -252,6 +241,31 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         if ($this->reviewsReceived->removeElement($review)) {
             if ($review->getTargetUser() === $this) {
                 $review->setTargetUser(null);
+            }
+        }
+        return $this;
+    }
+
+    /** @return Collection<int, UserSkill> */
+    public function getUserSkills(): Collection
+    {
+        return $this->userSkills;
+    }
+
+    public function addUserSkill(UserSkill $userSkill): static
+    {
+        if (!$this->userSkills->contains($userSkill)) {
+            $this->userSkills->add($userSkill);
+            $userSkill->setUser($this);
+        }
+        return $this;
+    }
+
+    public function removeUserSkill(UserSkill $userSkill): static
+    {
+        if ($this->userSkills->removeElement($userSkill)) {
+            if ($userSkill->getUser() === $this) {
+                $userSkill->setUser(null);
             }
         }
         return $this;

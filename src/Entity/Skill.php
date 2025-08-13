@@ -5,9 +5,13 @@ namespace App\Entity;
 use App\Repository\SkillRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: SkillRepository::class)]
+#[UniqueEntity(fields: ['name'], message: 'Cette compétence existe déjà.')]
 class Skill
 {
     #[ORM\Id]
@@ -15,23 +19,26 @@ class Skill
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[Assert\NotBlank]
+    #[Assert\Length(min: 2, max: 100)]
+    #[ORM\Column(length: 100, unique: true)]
     private ?string $name = null;
 
-    #[ORM\OneToMany(mappedBy: 'skillOffered', targetEntity: Offer::class)]
-    private Collection $offers;
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $description = null;
 
-    #[ORM\OneToMany(mappedBy: 'skillRequested', targetEntity: Offer::class)]
-    private Collection $requestedOffers;
-
-    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'skills')]
-    private Collection $users;
+    /** @var Collection<int, UserSkill> */
+    #[ORM\OneToMany(mappedBy: 'skill', targetEntity: UserSkill::class, orphanRemoval: false)]
+    private Collection $userSkills;
 
     public function __construct()
     {
-        $this->offers = new ArrayCollection();
-        $this->requestedOffers = new ArrayCollection();
-        $this->users = new ArrayCollection();
+        $this->userSkills = new ArrayCollection();
+    }
+
+    public function __toString(): string
+    {
+        return (string) ($this->name ?? 'Skill#'.$this->id);
     }
 
     public function getId(): ?int
@@ -44,84 +51,45 @@ class Skill
         return $this->name;
     }
 
-    public function setName(string $name): static
+public function setName(?string $name): self
+
     {
         $this->name = $name;
         return $this;
     }
 
-    /** ---------- Relation avec Offer (skillOffered) ---------- */
-
-    public function getOffers(): Collection
+    public function getDescription(): ?string
     {
-        return $this->offers;
+        return $this->description;
     }
 
-    public function addOffer(Offer $offer): static
+    public function setDescription(?string $description): self
     {
-        if (!$this->offers->contains($offer)) {
-            $this->offers->add($offer);
-            $offer->setSkillOffered($this);
+        $this->description = $description;
+        return $this;
+    }
+
+    /** @return Collection<int, UserSkill> */
+    public function getUserSkills(): Collection
+    {
+        return $this->userSkills;
+    }
+
+    public function addUserSkill(UserSkill $userSkill): self
+    {
+        if (!$this->userSkills->contains($userSkill)) {
+            $this->userSkills->add($userSkill);
+            $userSkill->setSkill($this);
         }
         return $this;
     }
 
-    public function removeOffer(Offer $offer): static
+    public function removeUserSkill(UserSkill $userSkill): self
     {
-        if ($this->offers->removeElement($offer)) {
-            if ($offer->getSkillOffered() === $this) {
-                $offer->setSkillOffered(null);
+        if ($this->userSkills->removeElement($userSkill)) {
+            if ($userSkill->getSkill() === $this) {
+                $userSkill->setSkill(null);
             }
-        }
-        return $this;
-    }
-
-    /** ---------- Relation avec Offer (skillRequested) ---------- */
-
-    public function getRequestedOffers(): Collection
-    {
-        return $this->requestedOffers;
-    }
-
-    public function addRequestedOffer(Offer $requestedOffer): static
-    {
-        if (!$this->requestedOffers->contains($requestedOffer)) {
-            $this->requestedOffers->add($requestedOffer);
-            $requestedOffer->setSkillRequested($this);
-        }
-        return $this;
-    }
-
-    public function removeRequestedOffer(Offer $requestedOffer): static
-    {
-        if ($this->requestedOffers->removeElement($requestedOffer)) {
-            if ($requestedOffer->getSkillRequested() === $this) {
-                $requestedOffer->setSkillRequested(null);
-            }
-        }
-        return $this;
-    }
-
-    /** ---------- Relation ManyToMany avec User ---------- */
-
-    public function getUsers(): Collection
-    {
-        return $this->users;
-    }
-
-    public function addUser(User $user): static
-    {
-        if (!$this->users->contains($user)) {
-            $this->users->add($user);
-            $user->addSkill($this);
-        }
-        return $this;
-    }
-
-    public function removeUser(User $user): static
-    {
-        if ($this->users->removeElement($user)) {
-            $user->removeSkill($this);
         }
         return $this;
     }
