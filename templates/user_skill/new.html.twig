@@ -1,0 +1,108 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ajouter une compétence{% endblock %}
+
+{% block stylesheets %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 2rem;
+            background-color: #f9f9f9;
+        }
+
+        h1 {
+            margin-bottom: 1rem;
+        }
+
+        form {
+            background-color: #fff;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            max-width: 500px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-top: 1rem;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            margin-top: 0.5rem;
+            box-sizing: border-box;
+        }
+
+        button {
+            margin-top: 1.5rem;
+            padding: 0.6rem 1.2rem;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        .alert {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border-radius: 6px;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .btn-secondary {
+            display: inline-block;
+            margin-top: 1rem;
+            color: #555;
+            text-decoration: none;
+            border: 1px solid #ccc;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+        }
+
+        .btn-secondary:hover {
+            background-color: #eee;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <h1>Ajouter une compétence</h1>
+
+    {# ✅ Message flash de confirmation #}
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }}">{{ message }}</div>
+        {% endfor %}
+    {% endfor %}
+
+    {{ form_start(form) }}
+        {{ form_label(form.skill) }}
+        {{ form_widget(form.skill) }}
+        {{ form_errors(form.skill) }}
+
+        {{ form_label(form.level) }}
+        {{ form_widget(form.level) }}
+        {{ form_errors(form.level) }}
+
+        {{ form_label(form.notes) }}
+        {{ form_widget(form.notes) }}
+        {{ form_errors(form.notes) }}
+
+        <button type="submit">Valider</button>
+    {{ form_end(form) }}
+
+    <a href="{{ path('app_home') }}" class="btn-secondary">← Retour à l'accueil</a>
+{% endblock %}

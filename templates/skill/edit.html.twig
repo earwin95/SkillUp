@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+{% block title %}Modifier {{ skill.name }}{% endblock %}
+
+{% block body %}
+  <div style="max-width: 800px; margin: 2rem auto; font-family: sans-serif;">
+    <h1>Modifier la compétence</h1>
+
+    {{ form_start(form) }}
+      {{ form_row(form.name) }}
+      <button type="submit" style="padding:6px 12px; cursor:pointer;">Mettre à jour</button>
+    {{ form_end(form) }}
+
+    <p style="margin-top: 1rem;">
+      <a href="{{ path('skill_show', {id: skill.id}) }}">← Retour</a>
+    </p>
+  </div>
+{% endblock %}

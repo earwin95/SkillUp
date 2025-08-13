@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+{% block title %}Nouvelle compétence{% endblock %}
+
+{% block body %}
+  <div style="max-width: 800px; margin: 2rem auto; font-family: sans-serif;">
+    <h1>Ajouter une compétence</h1>
+
+    {{ form_start(form) }}
+      {{ form_row(form.name) }}
+      <button type="submit" style="padding:6px 12px; cursor:pointer;">Enregistrer</button>
+    {{ form_end(form) }}
+
+    <p style="margin-top: 1rem;">
+      <a href="{{ path('app_skill') }}">← Retour</a>
+    </p>
+  </div>
+{% endblock %}

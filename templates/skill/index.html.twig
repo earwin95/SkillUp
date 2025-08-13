@@ -1,0 +1,56 @@
+{% extends 'base.html.twig' %}
+{% block title %}Liste des compétences{% endblock %}
+
+{% block body %}
+  <div style="max-width: 800px; margin: 2rem auto; font-family: sans-serif;">
+    <h1>Liste des compétences</h1>
+
+    {# messages flash simples #}
+    {% for label, messages in app.flashes %}
+      {% for message in messages %}
+        <div style="padding:8px; margin:8px 0; border:1px solid #ddd; background:#f8f8f8;">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endfor %}
+
+    <p style="margin: 1rem 0;">
+      <a href="{{ path('skill_new') }}">➕ Ajouter une compétence</a>
+    </p>
+
+    {% if skills is empty %}
+      <p>Aucune compétence trouvée.</p>
+    {% else %}
+      <table style="width:100%; border-collapse: collapse;">
+        <thead>
+          <tr>
+            <th style="text-align:left; border-bottom:1px solid #ddd; padding:6px;">ID</th>
+            <th style="text-align:left; border-bottom:1px solid #ddd; padding:6px;">Nom</th>
+            <th style="text-align:left; border-bottom:1px solid #ddd; padding:6px;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for skill in skills %}
+            <tr>
+              <td style="border-bottom:1px solid #eee; padding:6px;">{{ skill.id }}</td>
+              <td style="border-bottom:1px solid #eee; padding:6px;">
+                <a href="{{ path('skill_show', { id: skill.id }) }}">{{ skill.name }}</a>
+              </td>
+              <td style="border-bottom:1px solid #eee; padding:6px;">
+                <a href="{{ path('skill_show', { id: skill.id }) }}">Voir</a> |
+                <a href="{{ path('skill_edit', { id: skill.id }) }}">Modifier</a> |
+                <form method="post"
+                      action="{{ path('skill_delete', { id: skill.id }) }}"
+                      style="display:inline"
+                      onsubmit="return confirm('Supprimer cette compétence ?');">
+                  <input type="hidden" name="_token" value="{{ csrf_token('delete_skill_' ~ skill.id) }}">
+                  <button type="submit" style="background:none; border:none; color:#c00; cursor:pointer; padding:0;">Supprimer</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}
+  </div>
+{% endblock %}

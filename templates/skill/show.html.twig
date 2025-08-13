@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}
+{% block title %}{{ skill.name }}{% endblock %}
+
+{% block body %}
+  <div style="max-width: 800px; margin: 2rem auto; font-family: sans-serif;">
+    <h1>Détail de la compétence</h1>
+
+    <p><strong>ID :</strong> {{ skill.id }}</p>
+    <p><strong>Nom :</strong> {{ skill.name }}</p>
+
+    <p style="margin-top: 1rem;">
+      <a href="{{ path('skill_edit', {id: skill.id}) }}">Modifier</a>
+    </p>
+
+    <form method="post"
+          action="{{ path('skill_delete', {id: skill.id}) }}"
+          onsubmit="return confirm('Supprimer cette compétence ?');"
+          style="margin-top: 0.5rem;">
+      <input type="hidden" name="_token" value="{{ csrf_token('delete_skill_' ~ skill.id) }}">
+      <button type="submit" style="background:none; border:1px solid #c00; color:#c00; padding:6px 10px; cursor:pointer;">
+        Supprimer
+      </button>
+    </form>
+
+    <p style="margin-top: 1.5rem;">
+      <a href="{{ path('app_skill') }}">← Retour à la liste</a>
+    </p>
+  </div>
+{% endblock %}
