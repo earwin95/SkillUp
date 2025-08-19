@@ -1,8 +1,8 @@
 {% extends 'base.html.twig' %}
-{% block title %}Ajouter une compétence{% endblock %}
+{% block title %}Modifier une compétence{% endblock %}
 
 {% block body %}
-<h1>Ajouter une compétence</h1>
+<h1>Modifier la compétence</h1>
 
 {% for label, messages in app.flashes %}
   {% for message in messages %}
@@ -11,10 +11,11 @@
 {% endfor %}
 
 {{ form_start(form) }}
+  {# Dans le contrôleur, on a passé 'disable_skill' => true, le champ est donc désactivé #}
   {{ form_row(form.skill) }}
   {{ form_row(form.level) }}
   {{ form_row(form.notes) }}
-  <button class="btn btn-primary">💾 Ajouter</button>
+  <button class="btn btn-primary">💾 Enregistrer</button>
 {{ form_end(form) }}
 
 <p class="mt-3">

@@ -17,34 +17,38 @@ class UserSkillType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            // Sélecteur de Skill (liste des compétences existantes)
             ->add('skill', EntityType::class, [
                 'class' => Skill::class,
                 'choice_label' => 'name',
                 'placeholder' => 'Choisir une compétence…',
+                'disabled' => $options['disable_skill'], // ← on peut le désactiver en édition
             ])
-            // Enum -> select
             ->add('level', ChoiceType::class, [
-                // labels => valeurs (enum cases)
                 'choices' => [
                     'Beginner'     => SkillLevel::BEGINNER,
                     'Intermediate' => SkillLevel::INTERMEDIATE,
                     'Advanced'     => SkillLevel::ADVANCED,
                     'Expert'       => SkillLevel::EXPERT,
                 ],
-                'expanded' => false, // select <select>
-                'multiple' => false,
+                'placeholder' => 'Sélectionner un niveau…',
             ])
             ->add('notes', TextareaType::class, [
                 'required' => false,
                 'empty_data' => '',
+                'attr' => [
+                    'rows' => 3,
+                    'placeholder' => 'Notes (optionnel)…',
+                ],
             ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => UserSkill::class,
+            'data_class'    => UserSkill::class,
+            'disable_skill' => false, // par défaut on peut choisir la skill
         ]);
+
+        $resolver->setAllowedTypes('disable_skill', 'bool');
     }
 }
