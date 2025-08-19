@@ -12,6 +12,16 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class OfferController extends AbstractController
 {
+    #[Route('/offres', name: 'offer_index')]
+    public function index(EntityManagerInterface $em): Response
+    {
+        $offers = $em->getRepository(Offer::class)->findAll();
+
+        return $this->render('offer/index.html.twig', [
+            'offers' => $offers,
+        ]);
+    }
+
     #[Route('/offres/nouvelle', name: 'offer_new')]
     public function new(Request $request, EntityManagerInterface $em): Response
     {
@@ -34,41 +44,6 @@ class OfferController extends AbstractController
 
         return $this->render('offer/new.html.twig', [
             'form' => $form->createView(),
-        ]);
-    }
-
-    #[Route('/offres', name: 'offer_index')]
-    public function index(EntityManagerInterface $em): Response
-    {
-        $offers = $em->getRepository(Offer::class)->findAll();
-
-        return $this->render('offer/index.html.twig', [
-            'offers' => $offers,
-        ]);
-    }
-
-    #[Route('/offres/{id}/modifier', name: 'offer_edit')]
-    public function edit(Offer $offer, Request $request, EntityManagerInterface $em): Response
-    {
-        $this->denyAccessUnlessGranted('ROLE_USER');
-
-        if ($offer->getOwner() !== $this->getUser()) {
-            throw $this->createAccessDeniedException('Vous ne pouvez modifier que vos propres offres.');
-        }
-
-        $form = $this->createForm(OfferType::class, $offer);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $em->flush();
-            $this->addFlash('success', 'Offre modifiée avec succès !');
-
-            return $this->redirectToRoute('offer_index');
-        }
-
-        return $this->render('offer/edit.html.twig', [
-            'form' => $form->createView(),
-            'offer' => $offer,
         ]);
     }
 
