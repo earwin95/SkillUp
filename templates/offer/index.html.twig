@@ -1,20 +1,43 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello OfferController!{% endblock %}
+{% block title %}Toutes les offres{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
+<div class="max-w-4xl mx-auto mt-8">
+    <h1 class="text-3xl font-bold mb-6">Toutes les offres disponibles 📋</h1>
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
+    {% for message in app.flashes('success') %}
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+            {{ message }}
+        </div>
+    {% endfor %}
 
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>C:/Users/earwi/Desktop/projet/SkillUp/src/Controller/OfferController.php</code></li>
-        <li>Your template at <code>C:/Users/earwi/Desktop/projet/SkillUp/templates/offer/index.html.twig</code></li>
-    </ul>
+    {% if offers is empty %}
+        <p class="text-gray-600">Aucune offre pour le moment.</p>
+    {% else %}
+        <div class="space-y-6">
+            {% for offer in offers %}
+                <div class="p-4 bg-white rounded shadow">
+                    <h2 class="text-xl font-semibold">{{ offer.title }}</h2>
+                    <p class="text-gray-700 mb-2">{{ offer.description|e }}</p>
+                    <p class="text-sm text-gray-500">Statut : {{ offer.status }}</p>
+                    <p class="text-sm text-gray-500">Offre : {{ offer.skillOffered.name }} ➜ Recherche : {{ offer.skillRequested.name }}</p>
+                    <p class="text-sm text-gray-400">Posté par : {{ offer.owner.username }}</p>
+
+                    {% if app.user and app.user == offer.owner %}
+                        <div class="mt-4 flex gap-2">
+                            <a href="{{ path('offer_edit', {id: offer.id}) }}"
+                               class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded text-sm">✏️ Modifier</a>
+
+                            <form method="post" action="{{ path('offer_delete', {id: offer.id}) }}" onsubmit="return confirm('Supprimer cette offre ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete_offer_' ~ offer.id) }}">
+                                <button class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm">🗑️ Supprimer</button>
+                            </form>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
 </div>
 {% endblock %}
