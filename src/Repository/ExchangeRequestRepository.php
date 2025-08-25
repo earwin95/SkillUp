@@ -1,14 +1,15 @@
 <?php
 
+// src/Repository/ExchangeRequestRepository.php
+
 namespace App\Repository;
 
+use App\Entity\Offer;
 use App\Entity\ExchangeRequest;
+use App\Enum\ExchangeRequestStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @extends ServiceEntityRepository<ExchangeRequest>
- */
 class ExchangeRequestRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
@@ -16,28 +17,20 @@ class ExchangeRequestRepository extends ServiceEntityRepository
         parent::__construct($registry, ExchangeRequest::class);
     }
 
-    //    /**
-    //     * @return ExchangeRequest[] Returns an array of ExchangeRequest objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('e')
-    //            ->andWhere('e.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('e.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    /**
+     * @param Offer $offer
+     * @return ExchangeRequest[]
+     */
+    public function findPendingForOffer(Offer $offer): array
+    {
+        return $this->createQueryBuilder('e')
+            ->andWhere('e.offer = :offer')
+            ->andWhere('e.status = :status')
+            ->setParameter('offer', $offer)
+            ->setParameter('status', ExchangeRequestStatus::PENDING)
 
-    //    public function findOneBySomeField($value): ?ExchangeRequest
-    //    {
-    //        return $this->createQueryBuilder('e')
-    //            ->andWhere('e.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+            ->orderBy('e.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
 }

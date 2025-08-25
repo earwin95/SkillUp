@@ -48,28 +48,23 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Offer::class, mappedBy: 'owner')]
     private Collection $offers;
 
-    // SUPPRIMÉ: ManyToMany $skills (on passe par UserSkill)
-    // #[ORM\ManyToMany(targetEntity: Skill::class, mappedBy: 'users')]
-    // private Collection $skills;
-
     #[ORM\OneToMany(mappedBy: 'requester', targetEntity: ExchangeRequest::class)]
     private Collection $exchangeRequests;
 
     #[ORM\OneToMany(mappedBy: 'author', targetEntity: Review::class)]
-    private Collection $reviewsWritten;
+    private Collection $reviewsAuthored;
 
-    #[ORM\OneToMany(mappedBy: 'targetUser', targetEntity: Review::class)]
+    #[ORM\OneToMany(mappedBy: 'subjectUser', targetEntity: Review::class)]
     private Collection $reviewsReceived;
 
-    /** @var Collection<int, UserSkill> */
-    #[ORM\OneToMany(targetEntity: UserSkill::class, mappedBy: 'user')]
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: UserSkill::class)]
     private Collection $userSkills;
 
     public function __construct()
     {
         $this->offers = new ArrayCollection();
         $this->exchangeRequests = new ArrayCollection();
-        $this->reviewsWritten = new ArrayCollection();
+        $this->reviewsAuthored = new ArrayCollection();
         $this->reviewsReceived = new ArrayCollection();
         $this->userSkills = new ArrayCollection();
     }
@@ -121,7 +116,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function eraseCredentials(): void
     {
-        // $this->plainPassword = null; // si tu en utilises un
+        // $this->plainPassword = null;
     }
 
     public function getUsername(): ?string
@@ -197,23 +192,23 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /** @return Collection<int, Review> */
-    public function getReviewsWritten(): Collection
+    public function getReviewsAuthored(): Collection
     {
-        return $this->reviewsWritten;
+        return $this->reviewsAuthored;
     }
 
-    public function addReviewWritten(Review $review): static
+    public function addReviewAuthored(Review $review): static
     {
-        if (!$this->reviewsWritten->contains($review)) {
-            $this->reviewsWritten->add($review);
+        if (!$this->reviewsAuthored->contains($review)) {
+            $this->reviewsAuthored->add($review);
             $review->setAuthor($this);
         }
         return $this;
     }
 
-    public function removeReviewWritten(Review $review): static
+    public function removeReviewAuthored(Review $review): static
     {
-        if ($this->reviewsWritten->removeElement($review)) {
+        if ($this->reviewsAuthored->removeElement($review)) {
             if ($review->getAuthor() === $this) {
                 $review->setAuthor(null);
             }
@@ -231,7 +226,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if (!$this->reviewsReceived->contains($review)) {
             $this->reviewsReceived->add($review);
-            $review->setTargetUser($this);
+            $review->setSubjectUser($this);
         }
         return $this;
     }
@@ -239,8 +234,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function removeReviewReceived(Review $review): static
     {
         if ($this->reviewsReceived->removeElement($review)) {
-            if ($review->getTargetUser() === $this) {
-                $review->setTargetUser(null);
+            if ($review->getSubjectUser() === $this) {
+                $review->setSubjectUser(null);
             }
         }
         return $this;

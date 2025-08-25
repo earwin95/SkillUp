@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\OfferRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -34,6 +36,18 @@ class Offer
     #[ORM\ManyToOne(inversedBy: 'requestedOffers')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Skill $skillRequested = null;
+
+    #[ORM\OneToMany(mappedBy: 'offer', targetEntity: ExchangeRequest::class, orphanRemoval: true)]
+    private Collection $exchangeRequests;
+
+    #[ORM\OneToMany(mappedBy: 'offer', targetEntity: Review::class, orphanRemoval: false)]
+    private Collection $reviews;
+
+    public function __construct()
+    {
+        $this->exchangeRequests = new ArrayCollection();
+        $this->reviews = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -103,6 +117,56 @@ class Offer
     public function setSkillRequested(?Skill $skillRequested): static
     {
         $this->skillRequested = $skillRequested;
+        return $this;
+    }
+
+    /** @return Collection<int, ExchangeRequest> */
+    public function getExchangeRequests(): Collection
+    {
+        return $this->exchangeRequests;
+    }
+
+    public function addExchangeRequest(ExchangeRequest $er): static
+    {
+        if (!$this->exchangeRequests->contains($er)) {
+            $this->exchangeRequests->add($er);
+            $er->setOffer($this);
+        }
+        return $this;
+    }
+
+    public function removeExchangeRequest(ExchangeRequest $er): static
+    {
+        if ($this->exchangeRequests->removeElement($er)) {
+            if ($er->getOffer() === $this) {
+                $er->setOffer(null);
+            }
+        }
+        return $this;
+    }
+
+    /** @return Collection<int, Review> */
+    public function getReviews(): Collection
+    {
+        return $this->reviews;
+    }
+
+    public function addReview(Review $r): static
+    {
+        if (!$this->reviews->contains($r)) {
+            $this->reviews->add($r);
+            $r->setOffer($this);
+        }
+        return $this;
+    }
+
+    public function removeReview(Review $r): static
+    {
+        if ($this->reviews->removeElement($r)) {
+            if ($r->getOffer() === $this) {
+                $r->setOffer(null);
+            }
+        }
         return $this;
     }
 }

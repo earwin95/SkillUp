@@ -1,18 +1,41 @@
 <?php
 
+// src/Controller/ExchangeRequestController.php
+
 namespace App\Controller;
 
+use App\Entity\Offer;
+use App\Repository\OfferRepository;
+use App\Repository\ExchangeRequestRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Annotation\Route;
 
-final class ExchangeRequestController extends AbstractController
+class ExchangeRequestController extends AbstractController
 {
-    #[Route('/exchange/request', name: 'app_exchange_request')]
-    public function index(): Response
-    {
+    #[Route('/mes-demandes-reçues', name: 'app_exchange_requests')]
+    public function received(
+        OfferRepository $offerRepository,
+        ExchangeRequestRepository $exchangeRequestRepository
+    ): Response {
+        $this->denyAccessUnlessGranted('ROLE_USER');
+
+        $user = $this->getUser();
+        $offers = $offerRepository->findBy(['owner' => $user]);
+
+        $pendingRequestsByOffer = [];
+
+        foreach ($offers as $offer) {
+            $pendingRequests = $exchangeRequestRepository->findPendingForOffer($offer);
+
+            $pendingRequestsByOffer[$offer->getId()] = [
+                'offer' => $offer,
+                'requests' => $pendingRequests,
+            ];
+        }
+
         return $this->render('exchange_request/index.html.twig', [
-            'controller_name' => 'ExchangeRequestController',
+            'pendingRequestsByOffer' => $pendingRequestsByOffer,
         ]);
     }
 }
