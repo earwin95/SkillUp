@@ -1,0 +1,35 @@
+{% extends 'base.html.twig' %}
+{% block title %}Demandes pour l'offre {{ offer.title }}{% endblock %}
+
+{% block body %}
+<div class="container mx-auto p-6">
+  <h1 class="text-2xl font-bold mb-4">Demandes pour : “{{ offer.title }}”</h1>
+  <a class="text-blue-400 underline" href="{{ path('app_exchange_requests') }}">← Retour à mes demandes</a>
+
+  <div class="space-y-3 mt-6">
+    {% for er in requests %}
+      <div class="p-4 rounded border border-gray-700">
+        <div class="text-sm opacity-80">Créée le {{ er.createdAt|date('d/m/Y H:i') }}</div>
+        <div class="font-medium">Demandeur : {{ er.requester.username }}</div>
+        <div>Statut : <span class="font-semibold">{{ er.status.value }}</span></div>
+        {% if er.message %}
+          <div class="mt-2 text-sm italic opacity-90">{{ er.message }}</div>
+        {% endif %}
+
+        <div class="flex gap-2 mt-3">
+          <form method="post" action="{{ path('app_requests_accept', {id: er.id}) }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('accept' ~ er.id) }}">
+            <button class="px-3 py-1 rounded bg-green-600 hover:bg-green-700">Accepter</button>
+          </form>
+          <form method="post" action="{{ path('app_requests_decline', {id: er.id}) }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('decline' ~ er.id) }}">
+            <button class="px-3 py-1 rounded bg-red-600 hover:bg-red-700">Décliner</button>
+          </form>
+        </div>
+      </div>
+    {% else %}
+      <p class="opacity-70">Aucune demande pour cette offre.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

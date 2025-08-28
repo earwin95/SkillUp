@@ -28,8 +28,8 @@ class ExchangeRequest
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Offer $offer = null;
 
-    #[ORM\Column(enumType: ExchangeRequestStatus::class)]
-    private ExchangeRequestStatus $status = ExchangeRequestStatus::PENDING;
+#[ORM\Column(enumType: ExchangeRequestStatus::class)]
+private ExchangeRequestStatus $status = ExchangeRequestStatus::PENDING;
 
     #[Assert\Length(max: 1000)]
     #[ORM\Column(length: 1000, nullable: true)]

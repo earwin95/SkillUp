@@ -1,0 +1,66 @@
+{% extends 'base.html.twig' %}
+{% block title %}Mes demandes d'échange{% endblock %}
+
+{% block body %}
+<div class="container mx-auto p-6">
+  <h1 class="text-2xl font-bold mb-6">Mes demandes d'échange</h1>
+
+  {% for label, messages in app.flashes %}
+    {% for message in messages %}
+      <div class="mb-3 p-3 rounded bg-gray-800/40">{{ message }}</div>
+    {% endfor %}
+  {% endfor %}
+
+  <div class="grid md:grid-cols-2 gap-8">
+    <section>
+      <h2 class="text-xl font-semibold mb-3">📤 Envoyées</h2>
+      <div class="space-y-3">
+        {% for er in sent %}
+          <div class="p-4 rounded border border-gray-700">
+            <div class="text-sm opacity-80">{{ er.createdAt|date('d/m/Y H:i') }}</div>
+            <div class="font-medium">Offre : {{ er.offer.title }}</div>
+            <div>Propriétaire : {{ er.offer.owner.username }}</div>
+            <div>Statut : <span class="font-semibold">{{ er.status.value }}</span></div>
+            {% if er.message %}
+              <div class="mt-2 text-sm italic opacity-90">{{ er.message }}</div>
+            {% endif %}
+            <a class="text-blue-400 underline mt-2 inline-block"
+               href="{{ path('app_requests_by_offer', {id: er.offer.id}) }}">
+              Voir toutes les demandes de cette offre →
+            </a>
+          </div>
+        {% else %}
+          <p class="opacity-70">Aucune demande envoyée.</p>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section>
+      <h2 class="text-xl font-semibold mb-3">📥 Reçues (sur mes offres)</h2>
+      <div class="space-y-3">
+        {% for er in received %}
+          <div class="p-4 rounded border border-gray-700">
+            <div class="text-sm opacity-80">{{ er.createdAt|date('d/m/Y H:i') }}</div>
+            <div class="font-medium">Offre : {{ er.offer.title }}</div>
+            <div>Demandeur : {{ er.requester.username }}</div>
+            <div>Statut : <span class="font-semibold">{{ er.status.value }}</span></div>
+
+            <div class="flex gap-2 mt-3">
+              <form method="post" action="{{ path('app_requests_accept', {id: er.id}) }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('accept' ~ er.id) }}">
+                <button class="px-3 py-1 rounded bg-green-600 hover:bg-green-700">Accepter</button>
+              </form>
+              <form method="post" action="{{ path('app_requests_decline', {id: er.id}) }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('decline' ~ er.id) }}">
+                <button class="px-3 py-1 rounded bg-red-600 hover:bg-red-700">Décliner</button>
+              </form>
+            </div>
+          </div>
+        {% else %}
+          <p class="opacity-70">Aucune demande reçue.</p>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %}

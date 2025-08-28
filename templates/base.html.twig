@@ -1,78 +1,85 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <meta charset="UTF-8">
-    <title>{% block title %}SkillUp{% endblock %}</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 2rem;
-            background-color: #f7f7f7;
-            margin: 0;
-        }
+	<head>
+		<meta charset="UTF-8">
+		<title>
+			{% block title %}SkillUp
+			{% endblock %}
+		</title>
+		<style>
+			body {
+				font-family: Arial, sans-serif;
+				padding: 2rem;
+				background-color: #f7f7f7;
+				margin: 0;
+			}
 
-        nav {
-            background-color: #333;
-            padding: 10px 20px;
-        }
+			nav {
+				background-color: #333;
+				padding: 10px 20px;
+			}
 
-        nav a {
-            color: white;
-            margin-right: 15px;
-            text-decoration: none;
-        }
+			nav a {
+				color: white;
+				margin-right: 15px;
+				text-decoration: none;
+			}
 
-        nav a:hover {
-            text-decoration: underline;
-        }
+			nav a:hover {
+				text-decoration: underline;
+			}
 
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
+			.container {
+				max-width: 900px;
+				margin: 0 auto;
+				padding: 2rem;
+			}
 
-        .btn {
-            display: inline-block;
-            margin-top: 1rem;
-            margin-right: 1rem;
-            padding: 0.6rem 1.2rem;
-            background: #3498db;
-            color: white;
-            border-radius: 6px;
-            text-decoration: none;
-        }
+			.btn {
+				display: inline-block;
+				margin-top: 1rem;
+				margin-right: 1rem;
+				padding: 0.6rem 1.2rem;
+				background: #3498db;
+				color: white;
+				border-radius: 6px;
+				text-decoration: none;
+			}
 
-        .btn:hover {
-            background-color: #2980b9;
-        }
+			.btn:hover {
+				background-color: #2980b9;
+			}
 
-        h1 {
-            font-size: 2rem;
-        }
-    </style>
-</head>
-<body>
-    <nav>
-        <a href="{{ path('app_home') }}">🏠 Accueil</a>
+			h1 {
+				font-size: 2rem;
+			}
+		</style>
+	</head>
+	<body>
+		<nav>
+			<a href="{{ path('app_home') }}">🏠 Accueil</a>
 
-        {% if app.user %}
-            <a href="{{ path('app_profile') }}">👤 Profil</a>
-            <a href="{{ path('offer_index') }}">💼 Offres</a>
+			{% if app.user %}
+				<a href="{{ path('app_profile') }}">👤 Profil</a>
+				<a href="{{ path('offer_index') }}">💼 Offres</a>
 
-            {% if 'ROLE_ADMIN' in app.user.roles %}
-                <a href="{{ path('app_admin') }}">🔧 Admin</a>
-            {% endif %}
+				{% if 'ROLE_ADMIN' in app.user.roles %}
+					<a href="{{ path('app_admin') }}">🔧 Admin</a>
+				{% endif %}
 
-            <a href="{{ path('app_logout') }}">🚪 Déconnexion</a>
-        {% else %}
-            <a href="{{ path('app_login') }}">🔐 Connexion</a>
-            <a href="{{ path('app_register') }}">📝 Inscription</a>
-        {% endif %}
-    </nav>
+				<a href="{{ path('app_logout') }}">🚪 Déconnexion</a>
+			{% else %}
+				<a href="{{ path('app_login') }}">🔐 Connexion</a>
+				<a href="{{ path('app_register') }}">📝 Inscription</a>
+			{% endif %}
 
-    <div class="container">
-        {% block body %}{% endblock %}
-    </div>
-</body>
-</html>
+			{% if app.user %}
+				<a class="px-3 py-2 hover:underline" href="{{ path('app_exchange_requests') }}">Mes demandes</a>
+			{% endif %}
+
+		</nav>
+
+		<div class="container"> {% block body %}{% endblock %}
+			</div>
+		</body>
+	</html>

@@ -31,9 +31,18 @@ class Skill
     #[ORM\OneToMany(mappedBy: 'skill', targetEntity: UserSkill::class, orphanRemoval: false)]
     private Collection $userSkills;
 
+    // 🆕 Ajout des relations avec Offer
+    #[ORM\OneToMany(mappedBy: 'skillOffered', targetEntity: Offer::class)]
+    private Collection $offers;
+
+    #[ORM\OneToMany(mappedBy: 'skillRequested', targetEntity: Offer::class)]
+    private Collection $requestedOffers;
+
     public function __construct()
     {
         $this->userSkills = new ArrayCollection();
+        $this->offers = new ArrayCollection();
+        $this->requestedOffers = new ArrayCollection();
     }
 
     public function __toString(): string
@@ -51,8 +60,7 @@ class Skill
         return $this->name;
     }
 
-public function setName(?string $name): self
-
+    public function setName(?string $name): self
     {
         $this->name = $name;
         return $this;
@@ -89,6 +97,56 @@ public function setName(?string $name): self
         if ($this->userSkills->removeElement($userSkill)) {
             if ($userSkill->getSkill() === $this) {
                 $userSkill->setSkill(null);
+            }
+        }
+        return $this;
+    }
+
+    /** @return Collection<int, Offer> */
+    public function getOffers(): Collection
+    {
+        return $this->offers;
+    }
+
+    public function addOffer(Offer $offer): self
+    {
+        if (!$this->offers->contains($offer)) {
+            $this->offers->add($offer);
+            $offer->setSkillOffered($this);
+        }
+        return $this;
+    }
+
+    public function removeOffer(Offer $offer): self
+    {
+        if ($this->offers->removeElement($offer)) {
+            if ($offer->getSkillOffered() === $this) {
+                $offer->setSkillOffered(null);
+            }
+        }
+        return $this;
+    }
+
+    /** @return Collection<int, Offer> */
+    public function getRequestedOffers(): Collection
+    {
+        return $this->requestedOffers;
+    }
+
+    public function addRequestedOffer(Offer $offer): self
+    {
+        if (!$this->requestedOffers->contains($offer)) {
+            $this->requestedOffers->add($offer);
+            $offer->setSkillRequested($this);
+        }
+        return $this;
+    }
+
+    public function removeRequestedOffer(Offer $offer): self
+    {
+        if ($this->requestedOffers->removeElement($offer)) {
+            if ($offer->getSkillRequested() === $this) {
+                $offer->setSkillRequested(null);
             }
         }
         return $this;

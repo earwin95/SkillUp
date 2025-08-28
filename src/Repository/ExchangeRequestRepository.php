@@ -18,6 +18,8 @@ class ExchangeRequestRepository extends ServiceEntityRepository
     }
 
     /**
+     * Retourne les demandes d’échange en attente pour une offre donnée.
+     *
      * @param Offer $offer
      * @return ExchangeRequest[]
      */
@@ -27,8 +29,7 @@ class ExchangeRequestRepository extends ServiceEntityRepository
             ->andWhere('e.offer = :offer')
             ->andWhere('e.status = :status')
             ->setParameter('offer', $offer)
-            ->setParameter('status', ExchangeRequestStatus::PENDING)
-
+            ->setParameter('status', ExchangeRequestStatus::PENDING->value) // <= version correcte
             ->orderBy('e.createdAt', 'DESC')
             ->getQuery()
             ->getResult();

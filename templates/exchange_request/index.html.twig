@@ -77,3 +77,43 @@
     }
 </style>
 {% endblock %}
+{# {% extends 'base.html.twig' %}
+
+{% block title %}Mes demandes d'échange reçues{% endblock %}
+
+{% block body %}
+    <h1>📨 Demandes reçues pour mes offres</h1>
+
+    {% if pendingRequestsByOffer is empty %}
+        <p>Aucune demande en attente.</p>
+    {% else %}
+        {% for offerId, data in pendingRequestsByOffer %}
+            <div class="offer-block">
+                <h2>Offre : {{ data.offer.title }}</h2>
+
+                {% if data.requests is empty %}
+                    <p>📭 Aucune demande pour cette offre.</p>
+                {% else %}
+                    <ul>
+                        {% for request in data.requests %}
+                            <li>
+                                <strong>{{ request.requester.username }}</strong>
+                                a demandé un échange le {{ request.createdAt|date('d/m/Y H:i') }}.
+
+                                <form method="post" action="{{ path('exchange_request_accept', {'id': request.id}) }}" style="display: inline;">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('accept_exchange_' ~ request.id) }}">
+                                    <button type="submit">✅ Accepter</button>
+                                </form>
+
+                                <form method="post" action="{{ path('exchange_request_decline', {'id': request.id}) }}" style="display: inline;">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('decline_exchange_' ~ request.id) }}">
+                                    <button type="submit">❌ Refuser</button>
+                                </form>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endblock %} #}
