@@ -20,58 +20,104 @@ class ReviewFixtures extends Fixture implements DependentFixtureInterface
     {
         $faker = Factory::create('fr_FR');
 
-        // ✅ Récupère en BDD toutes les demandes ACCEPTED
+        // Petites phrases réalistes (sans lorem)
+        $posComments = [
+            "Très pédagogue et à l’écoute, j’ai bien progressé.",
+            "Explications claires, exemples concrets, super séance.",
+            "Ponctuel et sympa, je recommande sans hésiter.",
+            "Bonne préparation, on va droit à l’essentiel.",
+            "Ambiance détendue et efficace, merci !",
+            "Beaucoup de conseils utiles, j’ai appris plein de choses.",
+            "Communication fluide, très satisfait de l’échange.",
+            "Exemples adaptés à mon niveau, top !",
+            "Patient et méthodique, super expérience.",
+            "Je referai appel à lui/elle, merci encore.",
+        ];
+
+        $neutralComments = [
+            "Séance correcte, quelques points à approfondir.",
+            "Bon échange globalement, merci.",
+            "Contenu utile, mais pourrait aller un peu plus loin.",
+            "Rien à redire, c’était bien.",
+            "Bon contact, je recommande.",
+        ];
+
+        // ✅ 1) Reviews liées aux échanges ACCEPTED
         /** @var ExchangeRequest[] $acceptedRequests */
         $acceptedRequests = $manager->getRepository(ExchangeRequest::class)
-            ->findBy(['status' => ExchangeRequestStatus::ACCEPTED]);
+            ->findBy(['status' => ExchangeRequestStatus::ACCEPTED]); // OK si enum mappée
 
-        // 1) Reviews liées à des échanges ACCEPTED (dans les deux sens, souvent)
+        // Anti-doublons sur (authorId|subjectId|offerId|exchangeId)
+        $seen = [];
+
         foreach ($acceptedRequests as $er) {
             $requester = $er->getRequester();
-            $owner     = $er->getOffer()?->getOwner();
+            $offer     = $er->getOffer();
+            $owner     = $offer?->getOwner();
 
-            if (!$requester || !$owner || $requester->getId() === $owner->getId()) {
+            if (!$requester || !$owner || !$offer || $requester->getId() === $owner->getId()) {
                 continue;
             }
 
-            // a) requester -> owner
-            $r1 = (new Review())
-                ->setAuthor($requester)
-                ->setSubjectUser($owner)
-                ->setOffer($er->getOffer())
-                ->setExchangeRequest($er)
-                ->setRating($faker->numberBetween(4, 5))
-                ->setComment($faker->optional(0.8)->paragraph());
+            // Base temporelle : si createdAt inexistant, on prend -30 jours → maintenant
+            $erCreated = method_exists($er, 'getCreatedAt') && $er->getCreatedAt()
+                ? $er->getCreatedAt()
+                : new \DateTimeImmutable('-30 days');
 
-            $createdAt = $faker->dateTimeBetween($er->getCreatedAt()->format('Y-m-d H:i:s'), 'now');
-            $updatedAt = (clone $createdAt)->modify('+' . $faker->numberBetween(0, 7) . ' days');
+            // a) requester -> owner (note 4-5, 90% de chances d’un commentaire positif)
+            $key1 = sprintf('%d|%d|%d|%d', $requester->getId(), $owner->getId(), $offer->getId(), $er->getId());
+            if (!isset($seen[$key1])) {
+                $seen[$key1] = true;
 
-            $r1->setCreatedAt(\DateTimeImmutable::createFromMutable($createdAt));
-            $r1->setUpdatedAt(\DateTimeImmutable::createFromMutable($updatedAt));
-
-            $manager->persist($r1);
-
-            // b) owner -> requester (70% des cas)
-            if ($faker->boolean(70)) {
-                $r2 = (new Review())
-                    ->setAuthor($owner)
-                    ->setSubjectUser($requester)
-                    ->setOffer($er->getOffer())
+                $r1 = (new Review())
+                    ->setAuthor($requester)
+                    ->setSubjectUser($owner)
+                    ->setOffer($offer)
                     ->setExchangeRequest($er)
                     ->setRating($faker->numberBetween(4, 5))
-                    ->setComment($faker->optional(0.7)->paragraph());
+                    ->setComment($faker->boolean(90)
+                        ? $faker->randomElement($posComments)
+                        : $faker->randomElement($neutralComments)
+                    );
 
-                $c2 = (clone $createdAt)->modify('+' . $faker->numberBetween(0, 3) . ' days');
-                $u2 = (clone $c2)->modify('+' . $faker->numberBetween(0, 5) . ' days');
+                $createdAt1 = $faker->dateTimeBetween($erCreated->format('Y-m-d H:i:s'), 'now');
+                $updatedAt1 = (clone $createdAt1)->modify('+' . $faker->numberBetween(0, 7) . ' days');
 
-                $r2->setCreatedAt(\DateTimeImmutable::createFromMutable($c2));
-                $r2->setUpdatedAt(\DateTimeImmutable::createFromMutable($u2));
+                $r1->setCreatedAt(\DateTimeImmutable::createFromMutable($createdAt1));
+                $r1->setUpdatedAt(\DateTimeImmutable::createFromMutable($updatedAt1));
 
-                $manager->persist($r2);
+                $manager->persist($r1);
+            }
+
+            // b) owner -> requester (70% des cas), note 4-5
+            if ($faker->boolean(70)) {
+                $key2 = sprintf('%d|%d|%d|%d', $owner->getId(), $requester->getId(), $offer->getId(), $er->getId());
+                if (!isset($seen[$key2])) {
+                    $seen[$key2] = true;
+
+                    $r2 = (new Review())
+                        ->setAuthor($owner)
+                        ->setSubjectUser($requester)
+                        ->setOffer($offer)
+                        ->setExchangeRequest($er)
+                        ->setRating($faker->numberBetween(4, 5))
+                        ->setComment($faker->boolean(85)
+                            ? $faker->randomElement($posComments)
+                            : $faker->randomElement($neutralComments)
+                        );
+
+                    $createdAt2 = $faker->dateTimeBetween($erCreated->format('Y-m-d H:i:s'), 'now');
+                    $updatedAt2 = (clone $createdAt2)->modify('+' . $faker->numberBetween(0, 7) . ' days');
+
+                    $r2->setCreatedAt(\DateTimeImmutable::createFromMutable($createdAt2));
+                    $r2->setUpdatedAt(\DateTimeImmutable::createFromMutable($updatedAt2));
+
+                    $manager->persist($r2);
+                }
             }
         }
 
-        // 2) Quelques reviews "libres" (pas forcément liées à un échange)
+        // ✅ 2) Quelques reviews “libres” (pas forcément liées à un échange)
         /** @var User[] $users */
         $users  = $manager->getRepository(User::class)->findAll();
         /** @var Offer[] $offers */
@@ -84,17 +130,22 @@ class ReviewFixtures extends Fixture implements DependentFixtureInterface
             $author  = $faker->randomElement($users);
             $subject = $faker->randomElement($users);
             if ($author->getId() === $subject->getId()) {
-                $i--; // rejouer ce tour
+                $i--; // rejoue ce tour pour éviter self-review
                 continue;
             }
 
             $review = (new Review())
                 ->setAuthor($author)
                 ->setSubjectUser($subject)
+                // note 3-5 pour mimer une variabilité
                 ->setRating($faker->numberBetween(3, 5))
-                ->setComment($faker->optional(0.7)->paragraph());
+                ->setComment($faker->boolean(75)
+                    ? $faker->randomElement($posComments)
+                    : $faker->randomElement($neutralComments)
+                );
 
-            if ($offers && $faker->boolean(60)) {
+            // Optionnellement rattacher une offre
+            if (!empty($offers) && $faker->boolean(60)) {
                 $review->setOffer($faker->randomElement($offers));
             }
 
@@ -112,7 +163,7 @@ class ReviewFixtures extends Fixture implements DependentFixtureInterface
 
     public function getDependencies(): array
     {
-        // Besoin que Users, Offers et ExchangeRequests soient déjà en BDD
+        // Users, Offers et ExchangeRequests doivent exister
         return [
             UserFixtures::class,
             OfferFixtures::class,
