@@ -3,6 +3,50 @@
 {% block title %}Accueil{% endblock %}
 
 {% block body %}
+  {# === Bloc de recherche : visible seulement pour les utilisateurs connectés === #}
+  {% if app.user %}
+    {{ form_start(form, {
+        method: 'GET',
+        action: path('offer_index'),
+        attr: { id: 'home-search-form' }
+    }) }}
+      <div class="search-card">
+        <div class="search-grid">
+          <div class="field">
+            {{ form_label(form.skillOffered, 'Skill offered') }}
+            {{ form_widget(form.skillOffered) }}
+          </div>
+
+          <div class="field">
+            {{ form_label(form.skillRequested, 'Skill requested') }}
+            {{ form_widget(form.skillRequested) }}
+          </div>
+
+          <div class="field">
+            {{ form_label(form.q, 'Q') }}
+            {{ form_widget(form.q, { attr: { placeholder: 'Mot-clé (titre, description)…' } }) }}
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="submit" class="btn-search">🔍 Rechercher</button>
+          <a href="{{ path('app_home') }}" class="link-reset">↩ Réinitialiser</a>
+        </div>
+      </div>
+    {{ form_end(form) }}
+  {% else %}
+    <div class="search-card" style="opacity:.9">
+      <p style="margin:0 0 .4rem 0;"><strong>Connecte-toi</strong> pour accéder à la recherche d’offres.</p>
+      <div class="actions">
+        <a href="{{ path('app_login') }}" class="btn-search">🔑 Se connecter</a>
+        <a href="{{ path('app_register') }}" class="link-reset">📝 S’inscrire</a>
+      </div>
+    </div>
+  {% endif %}
+
+  <hr style="margin: 1rem 0;">
+
+  {# === Ton contenu d’accueil existant === #}
   <h1>Bienvenue sur <strong>SkillUp</strong> 👋</h1>
 
   <p>
@@ -19,4 +63,75 @@
       <a href="{{ path('app_register') }}" class="btn">📝 S’inscrire</a>
     {% endif %}
   </div>
+
+  {# --- Styles du bloc de recherche --- #}
+  <style>
+    .search-card{
+      background:#fff;
+      border:1px solid #e6e6e6;
+      border-radius:12px;
+      box-shadow:0 6px 18px rgba(0,0,0,.05);
+      padding:16px 18px;
+      margin:16px 0 8px;
+    }
+    .search-grid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:12px;
+    }
+    @media (min-width: 860px){
+      .search-grid{ grid-template-columns: 1fr 1fr 1fr; }
+    }
+    .field label{
+      display:block;
+      font-size:13px;
+      color:#444;
+      margin-bottom:4px;
+      font-weight:600;
+      letter-spacing:.2px;
+    }
+    .field select,
+    .field input[type="text"]{
+      width:100%;
+      padding:.48rem .6rem;
+      border:1px solid #cfcfcf;
+      border-radius:8px;
+      outline:none;
+      transition:border-color .15s, box-shadow .15s;
+      background:#fafafa;
+    }
+    .field select:focus,
+    .field input[type="text"]:focus{
+      border-color:#3498db;
+      box-shadow:0 0 0 3px rgba(52,152,219,.15);
+      background:#fff;
+    }
+    .actions{
+      display:flex;
+      align-items:center;
+      gap:.8rem;
+      margin-top:10px;
+      flex-wrap:wrap;
+    }
+    .btn-search{
+      display:inline-flex;
+      align-items:center;
+      gap:.35rem;
+      border:1px solid #9bbcf0;
+      background:#eaf2ff;
+      color:#2c3e50;
+      padding:.48rem .9rem;
+      border-radius:8px;
+      cursor:pointer;
+      font-weight:600;
+      text-decoration:none;
+    }
+    .btn-search:hover{ background:#dfeaff; }
+    .link-reset{
+      color:#5b67d6;
+      text-decoration:none;
+      font-size:14px;
+    }
+    .link-reset:hover{ text-decoration:underline; }
+  </style>
 {% endblock %}

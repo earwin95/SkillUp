@@ -5,25 +5,39 @@
 {% block body %}
     <h1>📋 Liste des Offres</h1>
 
-    {% for offer in offers %}
+    {# --- Formulaire de recherche par compétences (offerte + demandée) + mot-clé --- #}
+    {{ form_start(form, { method: 'GET' }) }}
         <div class="offer-card">
-            <h2>{{ offer.title }}</h2>
-            <p><strong>Proposée par :</strong> {{ offer.owner.username }}</p>
-            <p><strong>Compétence proposée :</strong> {{ offer.skillOffered.name }}</p>
-            <p><strong>Compétence recherchée :</strong> {{ offer.skillRequested.name }}</p>
-            <p><strong>Description :</strong> {{ offer.description }}</p>
-            <p><strong>Status :</strong> {{ offer.status }}</p>
+            <div class="filters">
+                <div class="filter-item">
+                    {{ form_row(form.skillOffered) }}
+                </div>
+                <div class="filter-item">
+                    {{ form_row(form.skillRequested) }}
+                </div>
+                <div class="filter-item filter-q">
+                    {{ form_row(form.q) }}
+                </div>
+            </div>
 
-            {% if app.user and app.user.id == offer.owner.id %}
-                <form method="post" action="{{ path('offer_delete', {'id': offer.id}) }}" onsubmit="return confirm('Supprimer cette offre ?');">
-                    <input type="hidden" name="_token" value="{{ csrf_token('delete_offer_' ~ offer.id) }}">
-                    <button class="btn-delete">🗑 Supprimer</button>
-                </form>
-            {% endif %}
+            <div class="actions">
+                <button type="submit" class="btn-search">🔍 Rechercher</button>
+                <a href="{{ path('offer_index') }}" class="btn-reset">↩ Réinitialiser</a>
+            </div>
         </div>
-    {% else %}
-        <p>Aucune offre disponible pour le moment.</p>
-    {% endfor %}
+    {{ form_end(form) }}
+
+    <hr style="margin: 2rem 0;">
+
+    <div id="offers-container">
+        {# Liste initiale (serveur) #}
+        {% include 'offer/_offers_list.html.twig' with {
+            offers: offers,
+            page: page,
+            pages: pages,
+            total: total
+        } %}
+    </div>
 {% endblock %}
 
 {% block stylesheets %}
@@ -46,8 +60,25 @@
         color: #2c3e50;
     }
 
-    p {
-        margin: 0.3rem 0;
+    p { margin: 0.3rem 0; }
+
+    .filters {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0.8rem;
+    }
+
+    @media (min-width: 900px) {
+        .filters {
+            grid-template-columns: 1fr 1fr 1fr; /* Offerte | Demandée | Mot-clé */
+        }
+    }
+
+    .actions {
+        display: flex;
+        gap: 0.6rem;
+        flex-wrap: wrap;
+        margin-top: 0.6rem;
     }
 
     .btn-delete {
@@ -59,9 +90,149 @@
         border-radius: 5px;
         cursor: pointer;
     }
+    .btn-delete:hover { background-color: #c0392b; }
 
-    .btn-delete:hover {
-        background-color: #c0392b;
+    .btn-search {
+        background-color: #3498db;
+        color: white;
+        padding: 0.5rem 1rem;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        text-decoration: none;
+    }
+    .btn-search:hover { background-color: #2980b9; }
+
+    .btn-reset {
+        background: #ecf0f1;
+        color: #2c3e50;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        text-decoration: none;
+        display: inline-block;
+    }
+    .btn-reset:hover { background: #d0d7dc; }
+
+    select, .filter-q input[type="text"] {
+        padding: 0.4rem;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        width: 100%;
+    }
+
+    /* Pagination */
+    .pagination {
+        display: flex;
+        gap: .4rem;
+        flex-wrap: wrap;
+        margin-top: 1rem;
+        align-items: center;
+    }
+    .pagination a, .pagination span {
+        display: inline-block;
+        padding: .4rem .7rem;
+        border-radius: 6px;
+        text-decoration: none;
+        border: 1px solid #d7d7d7;
+        background: #fff;
+        color: #2c3e50;
+    }
+    .pagination .active {
+        border-color: #3498db;
+        background: #3498db;
+        color: #fff;
+        font-weight: 600;
+    }
+    .pagination .disabled {
+        opacity: .5;
+        pointer-events: none;
     }
 </style>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.querySelector('form'); // le form de recherche
+    const container = document.getElementById('offers-container');
+
+    if (!form || !container) return;
+
+    function buildUrlWithParams(extraParams = {}) {
+        const url = new URL(form.getAttribute('action') || window.location.href, window.location.origin);
+        const formData = new FormData(form);
+        url.search = '';
+        for (const [key, value] of formData.entries()) {
+            if (value && value.toString().trim() !== '') {
+                url.searchParams.set(key, value.toString());
+            }
+        }
+        // page spécifique (pagination)
+        Object.entries(extraParams).forEach(([k, v]) => {
+            if (v === null || v === undefined || v === '') {
+                url.searchParams.delete(k);
+            } else {
+                url.searchParams.set(k, v);
+            }
+        });
+        return url;
+    }
+
+    async function fetchOffers(evt, extraParams = {}) {
+        if (evt) evt.preventDefault();
+
+        const url = buildUrlWithParams(extraParams);
+        const headers = new Headers({ 'X-Requested-With': 'XMLHttpRequest' });
+
+        container.setAttribute('aria-busy', 'true');
+        container.style.opacity = '0.6';
+
+        try {
+            const res = await fetch(url.toString(), { headers });
+            if (!res.ok) throw new Error('Erreur réseau');
+
+            const html = await res.text();
+            container.innerHTML = html;
+
+            // Mettre à jour l'URL de la page (utile pour partage/refresh)
+            window.history.replaceState({}, '', url.toString());
+        } catch (e) {
+            container.innerHTML = '<p style="color:#e74c3c;">Une erreur est survenue. Réessaie.</p>';
+            console.error(e);
+        } finally {
+            container.removeAttribute('aria-busy');
+            container.style.opacity = '1';
+        }
+    }
+
+    // Submit manuel
+    form.addEventListener('submit', (e) => fetchOffers(e, { page: 1 }));
+
+    // Auto-submit sur changement d'un filtre
+    form.addEventListener('change', (e) => {
+        if (e.target.tagName === 'BUTTON' || e.target.closest('.btn-reset')) return;
+        fetchOffers(e, { page: 1 });
+    });
+
+    // Bouton "Réinitialiser"
+    const resetLink = document.querySelector('.btn-reset');
+    if (resetLink) {
+        resetLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            form.reset();
+            fetchOffers(e, { page: 1 });
+        });
+    }
+
+    // Pagination AJAX (délégation d'événements)
+    container.addEventListener('click', (e) => {
+        const link = e.target.closest('a[data-page]');
+        if (!link) return;
+
+        e.preventDefault();
+        const page = parseInt(link.getAttribute('data-page'), 10) || 1;
+        fetchOffers(e, { page });
+    });
+});
+</script>
 {% endblock %}
