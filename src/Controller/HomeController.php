@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Form\SearchOfferType;
+use App\Form\SearchOfferHomeType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -13,13 +13,11 @@ class HomeController extends AbstractController
     #[Route('/', name: 'app_home')]
     public function index(Request $request): Response
     {
-        // Formulaire minimal : 2 selects (offerte/demandée) + champ mot-clé
-        // On laisse l'action du form côté Twig => offer_index
-        $form = $this->createForm(SearchOfferType::class, null, [
+        // Formulaire d’accueil SANS mot-clé, qui envoie vers /offres
+        $form = $this->createForm(SearchOfferHomeType::class, null, [
             'method' => 'GET',
+            'action' => $this->generateUrl('offer_index'),
         ]);
-        // Pas indispensable ici, mais permet de pré-remplir si besoin
-        $form->handleRequest($request);
 
         return $this->render('home/index.html.twig', [
             'form' => $form->createView(),

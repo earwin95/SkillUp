@@ -21,11 +21,6 @@
             {{ form_label(form.skillRequested, 'Skill requested') }}
             {{ form_widget(form.skillRequested) }}
           </div>
-
-          <div class="field">
-            {{ form_label(form.q, 'Q') }}
-            {{ form_widget(form.q, { attr: { placeholder: 'Mot-clé (titre, description)…' } }) }}
-          </div>
         </div>
 
         <div class="actions">
@@ -80,7 +75,7 @@
       gap:12px;
     }
     @media (min-width: 860px){
-      .search-grid{ grid-template-columns: 1fr 1fr 1fr; }
+      .search-grid{ grid-template-columns: 1fr 1fr; }
     }
     .field label{
       display:block;
