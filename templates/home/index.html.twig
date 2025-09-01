@@ -3,130 +3,254 @@
 {% block title %}Accueil{% endblock %}
 
 {% block body %}
-  {# === Bloc de recherche : visible seulement pour les utilisateurs connectés === #}
+  <section class="hero">
+    <h1 class="hero-title">
+      Bienvenue sur <span>SkillUp</span> 👋
+    </h1>
+    <p class="hero-sub">
+      Échange de compétences entre membres — propose ton savoir-faire et apprends gratuitement.
+    </p>
+  </section>
+
+  {# === Bloc de recherche (visible uniquement si connecté) === #}
   {% if app.user %}
     {{ form_start(form, {
-        method: 'GET',
-        action: path('offer_index'),
-        attr: { id: 'home-search-form' }
+      method: 'GET',
+      action: path('offer_index'),
+      attr: { id: 'home-search-form', class: 'search-card' }
     }) }}
-      <div class="search-card">
-        <div class="search-grid">
-          <div class="field">
-            {{ form_label(form.skillOffered, 'Skill offered') }}
-            {{ form_widget(form.skillOffered) }}
-          </div>
+      <div class="search-grid">
+        <div class="field">
+          <label class="label">🎯 j'offre ce skill</label>
+          {{ form_widget(form.skillOffered) }}
+        </div>
 
-          <div class="field">
-            {{ form_label(form.skillRequested, 'Skill requested') }}
-            {{ form_widget(form.skillRequested) }}
-          </div>
+        <div class="field">
+          <label class="label">🔄 je veux ce skill</label>
+          {{ form_widget(form.skillRequested) }}
         </div>
 
         <div class="actions">
-          <button type="submit" class="btn-search">🔍 Rechercher</button>
-          <a href="{{ path('app_home') }}" class="link-reset">↩ Réinitialiser</a>
+          <button type="submit" class="btn btn-primary">🔍 Rechercher</button>
+          <a href="{{ path('app_home') }}" class="btn btn-ghost">↩ Réinitialiser</a>
         </div>
       </div>
     {{ form_end(form) }}
   {% else %}
-    <div class="search-card" style="opacity:.9">
-      <p style="margin:0 0 .4rem 0;"><strong>Connecte-toi</strong> pour accéder à la recherche d’offres.</p>
+    <div class="search-card search-locked">
+      <div class="locked-text">
+        🔒 <strong>Connecte-toi</strong> pour accéder à la recherche d’offres.
+      </div>
       <div class="actions">
-        <a href="{{ path('app_login') }}" class="btn-search">🔑 Se connecter</a>
-        <a href="{{ path('app_register') }}" class="link-reset">📝 S’inscrire</a>
+        <a href="{{ path('app_login') }}" class="btn btn-primary">🔑 Se connecter</a>
+        <a href="{{ path('app_register') }}" class="btn btn-ghost">📝 S’inscrire</a>
       </div>
     </div>
   {% endif %}
 
-  <hr style="margin: 1rem 0;">
-
-  {# === Ton contenu d’accueil existant === #}
-  <h1>Bienvenue sur <strong>SkillUp</strong> 👋</h1>
-
-  <p>
-    SkillUp est une plateforme d’échange de compétences entre utilisateurs.
-    Tu peux proposer ton savoir-faire et apprendre gratuitement grâce aux autres membres.
-  </p>
-
-  <div class="links">
+  <section class="cta">
     {% if app.user %}
-      <a href="{{ path('app_user_skills_new') }}" class="btn">➕ Ajouter une compétence</a>
-      <a href="{{ path('app_user_skills_index') }}" class="btn">📋 Voir mes compétences</a>
-    {% else %}
-      <a href="{{ path('app_login') }}" class="btn">🔑 Se connecter</a>
-      <a href="{{ path('app_register') }}" class="btn">📝 S’inscrire</a>
-    {% endif %}
+      <a href="{{ path('app_user_skills_new') }}" class="card">
+  <div class="card-emoji">➕</div>
+  <div class="card-text">
+    <div class="card-title">Ajouter une compétence</div>
+    <div class="card-sub">Mets en avant ce que tu peux transmettre</div>
   </div>
+</a>
 
-  {# --- Styles du bloc de recherche --- #}
+<a href="{{ path('app_user_skills_index') }}" class="card">
+  <div class="card-emoji">📋</div>
+  <div class="card-text">
+    <div class="card-title">Voir mes compétences</div>
+    <div class="card-sub">Gère et mets à jour ton profil</div>
+  </div>
+</a>
+
+    {% else %}
+      <a href="{{ path('app_login') }}" class="card">
+        <div class="card-emoji">🔐</div>
+        <div class="card-title">Se connecter</div>
+        <div class="card-sub">Reviens là où tu t’étais arrêté</div>
+      </a>
+
+      <a href="{{ path('app_register') }}" class="card">
+        <div class="card-emoji">✨</div>
+        <div class="card-title">Créer un compte</div>
+        <div class="card-sub">Rejoins la communauté SkillUp</div>
+      </a>
+    {% endif %}
+  </section>
+
   <style>
-    .search-card{
-      background:#fff;
-      border:1px solid #e6e6e6;
-      border-radius:12px;
-      box-shadow:0 6px 18px rgba(0,0,0,.05);
-      padding:16px 18px;
-      margin:16px 0 8px;
+    /* ---- Theme tokens ---- */
+    :root {
+      --primary: #3461ff;
+      --primary-50: #eaf0ff;
+      --text: #2c3e50;
+      --muted: #6b7280;
+      --ring: rgba(52,97,255,.18);
+      --card: #ffffff;
+      --border: #e7e7e9;
+      --shadow: 0 12px 30px rgba(15, 23, 42, .06);
+      --radius: 14px;
     }
-    .search-grid{
-      display:grid;
-      grid-template-columns:1fr;
-      gap:12px;
+
+    /* ---- Hero ---- */
+    .hero {
+      margin: 4px 0 14px 0;
     }
-    @media (min-width: 860px){
-      .search-grid{ grid-template-columns: 1fr 1fr; }
+    .hero-title {
+      margin: 0;
+      font-size: clamp(26px, 3.2vw, 34px);
+      line-height: 1.15;
+      color: var(--text);
+      font-weight: 800;
+      letter-spacing: .2px;
     }
-    .field label{
-      display:block;
-      font-size:13px;
-      color:#444;
-      margin-bottom:4px;
-      font-weight:600;
-      letter-spacing:.2px;
+    .hero-title span {
+      background: linear-gradient(90deg, var(--primary), #8a5cff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
     }
+    .hero-sub {
+      margin: 6px 0 0 0;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    /* ---- Search card ---- */
+    .search-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow);
+      margin: 16px 0 18px 0;
+    }
+    .search-locked { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .locked-text { color: var(--text); }
+
+    .search-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    @media (min-width: 860px) {
+      .search-grid {
+        grid-template-columns: 1fr 1fr auto;
+        align-items: end;
+      }
+    }
+
+    .label {
+      display: block;
+      font-size: 12.5px;
+      color: var(--muted);
+      margin: 0 0 6px 2px;
+      font-weight: 600;
+      letter-spacing: .2px;
+    }
+
     .field select,
-    .field input[type="text"]{
-      width:100%;
-      padding:.48rem .6rem;
-      border:1px solid #cfcfcf;
-      border-radius:8px;
-      outline:none;
-      transition:border-color .15s, box-shadow .15s;
-      background:#fafafa;
+    .field input[type="text"] {
+      width: 100%;
+      padding: .62rem .7rem;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #f9fafb;
+      color: var(--text);
+      outline: none;
+      transition: box-shadow .15s ease, border-color .15s ease, background .15s ease, transform .06s ease;
     }
     .field select:focus,
-    .field input[type="text"]:focus{
-      border-color:#3498db;
-      box-shadow:0 0 0 3px rgba(52,152,219,.15);
-      background:#fff;
+    .field input[type="text"]:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px var(--ring);
+      background: #fff;
     }
-    .actions{
-      display:flex;
-      align-items:center;
-      gap:.8rem;
-      margin-top:10px;
-      flex-wrap:wrap;
+    .field select:hover,
+    .field input[type="text"]:hover {
+      background: #fff;
     }
-    .btn-search{
-      display:inline-flex;
-      align-items:center;
-      gap:.35rem;
-      border:1px solid #9bbcf0;
-      background:#eaf2ff;
-      color:#2c3e50;
-      padding:.48rem .9rem;
-      border-radius:8px;
-      cursor:pointer;
-      font-weight:600;
-      text-decoration:none;
+
+    .actions {
+      display: flex;
+      gap: .6rem;
+      flex-wrap: wrap;
     }
-    .btn-search:hover{ background:#dfeaff; }
-    .link-reset{
-      color:#5b67d6;
-      text-decoration:none;
-      font-size:14px;
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: .35rem;
+      text-decoration: none;
+      border-radius: 10px;
+      padding: .6rem 1rem;
+      font-weight: 700;
+      border: 1px solid transparent;
+      transition: transform .06s ease, filter .15s ease, background .15s ease, border-color .15s ease;
     }
-    .link-reset:hover{ text-decoration:underline; }
+    .btn:active, .btn-primary:active, .btn-ghost:active { transform: translateY(1px); }
+
+    .btn-primary {
+      background: var(--primary-50);
+      border-color: #b9c8ff;
+      color: var(--text);
+    }
+    .btn-primary:hover { filter: brightness(0.98); }
+
+    .btn-ghost {
+      background: transparent;
+      border-color: var(--border);
+      color: var(--text);
+    }
+    .btn-ghost:hover { background: #f6f7fb; }
+
+    /* ---- CTA Cards ---- */
+    .cta {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      margin-top: 8px;
+    }
+    @media (min-width: 760px) {
+      .cta { grid-template-columns: 1fr 1fr; }
+    }
+    .card {
+      display: grid;
+      grid-template-columns: 56px 1fr;
+      gap: 12px;
+      align-items: center;
+      padding: 14px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      text-decoration: none;
+      color: var(--text);
+      transition: transform .06s ease, box-shadow .15s ease;
+    }
+    .card:hover { transform: translateY(-1px); box-shadow: 0 18px 36px rgba(15,23,42,.08); }
+    .card-emoji {
+      width: 56px;
+      height: 56px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      font-size: 24px;
+      background: #f4f6ff;
+      border: 1px solid #e0e6ff;
+    }
+    .card-title {
+      font-weight: 800;
+      letter-spacing: .2px;
+    }
+    .card-sub {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 2px;
+    }
   </style>
 {% endblock %}
