@@ -5,7 +5,10 @@
     {% for offer in offers %}
       <article class="offer-card">
         <header class="offer-head">
-          <h2 class="offer-title">{{ offer.title }}</h2>
+          <h2 class="offer-title">
+            {# 🔗 Lien vers la page détail + chat (par ID). Si tu utilises un slug, remplace { id: offer.id } par { slug: offer.slug } #}
+            <a class="offer-title-link" href="{{ path('offer_show', { id: offer.id }) }}">{{ offer.title }}</a>
+          </h2>
 
           {% set hasCreatedAt = offer.createdAt is defined and offer.createdAt %}
           {% if hasCreatedAt %}
@@ -31,24 +34,29 @@
 
           <div class="meta">
             <span class="meta-label">🎯 Skill offert</span>
-            <span class="chip chip-offered">{{ offer.skillOffered.name }}</span>
+            <span class="chip chip-offered">{{ (offer.skillOffered.name ?? offer.skillOffered) ?: '—' }}</span>
           </div>
 
           <div class="meta">
             <span class="meta-label">🔄 Skill recherché</span>
-            <span class="chip chip-requested">{{ offer.skillRequested.name }}</span>
+            <span class="chip chip-requested">{{ (offer.skillRequested.name ?? offer.skillRequested) ?: '—' }}</span>
           </div>
         </div>
 
-        {% if app.user and app.user.id == offer.owner.id %}
-          <form method="post"
-                action="{{ path('offer_delete', {'id': offer.id}) }}"
-                class="offer-actions"
-                onsubmit="return confirm('Supprimer cette offre ?');">
-            <input type="hidden" name="_token" value="{{ csrf_token('delete_offer_' ~ offer.id) }}">
-            <button class="btn-delete" type="submit" title="Supprimer l’offre">🗑 Supprimer</button>
-          </form>
-        {% endif %}
+        <div class="offer-actions">
+          <a class="btn-view" href="{{ path('offer_show', { id: offer.id }) }}" title="Voir l’offre et discuter">
+            💬 Voir & discuter
+          </a>
+
+          {% if app.user and app.user.id == offer.owner.id %}
+            <form method="post"
+                  action="{{ path('offer_delete', {'id': offer.id}) }}"
+                  onsubmit="return confirm('Supprimer cette offre ?');">
+              <input type="hidden" name="_token" value="{{ csrf_token('delete_offer_' ~ offer.id) }}">
+              <button class="btn-delete" type="submit" title="Supprimer l’offre">🗑 Supprimer</button>
+            </form>
+          {% endif %}
+        </div>
       </article>
     {% endfor %}
   </section>
@@ -106,6 +114,9 @@
 
   .offer-head{ display:grid; grid-template-columns:1fr auto auto; align-items:center; gap:10px; margin-bottom:6px; }
   .offer-title{ margin:0; font-size:16.5px; font-weight:800; color:var(--ink); letter-spacing:.2px; }
+  .offer-title-link{ color:inherit; text-decoration:none; }
+  .offer-title-link:hover{ text-decoration:underline; }
+
   .offer-date{ font-size:12px; color:var(--muted); padding:2px 8px; border-radius:999px; border:1px solid var(--panel-border);
                background:rgba(127,127,127,.06); white-space:nowrap; }
   .offer-status{ font-size:12px; padding:3px 9px; border-radius:999px; border:1px solid var(--panel-border); white-space:nowrap; }
@@ -124,7 +135,12 @@
   .chip-offered{ background:linear-gradient(90deg,#eaf2ff,#e6fffb); border-color:#c7dcff; color:#1f2a44; }
   .chip-requested{ background:linear-gradient(90deg,#fff0f3,#fef3c7); border-color:#ffd1db; color:#3a1f2a; }
 
-  .offer-actions{ display:flex; justify-content:flex-end; margin-top:10px; }
+  .offer-actions{ display:flex; justify-content:flex-end; align-items:center; gap:8px; margin-top:10px; }
+  .btn-view{ background:linear-gradient(90deg,#6366f1,#22c55e); border:none; color:#fff; padding:.48rem .85rem; border-radius:10px; cursor:pointer;
+             font-weight:800; text-decoration:none; box-shadow:0 8px 16px rgba(99,102,241,.28); transition:transform .06s, filter .15s, box-shadow .15s; }
+  .btn-view:hover{ filter:brightness(1.06); box-shadow:0 10px 20px rgba(34,197,94,.28); }
+  .btn-view:active{ transform:translateY(1px); }
+
   .btn-delete{ background:linear-gradient(90deg,#ef4444,#f97316); border:none; color:#fff; padding:.45rem .8rem; border-radius:10px; cursor:pointer;
                font-weight:800; transition:transform .06s, filter .15s, box-shadow .15s; }
   .btn-delete:hover{ filter:brightness(1.05); box-shadow:0 8px 16px rgba(249,115,22,.28); }

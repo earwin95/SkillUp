@@ -6,6 +6,7 @@ use App\Entity\Offer;
 use App\Form\OfferType;
 use App\Form\SearchOfferType;
 use App\Repository\OfferRepository;
+use App\Repository\ConversationRepository; 
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,7 +18,6 @@ class OfferController extends AbstractController
     #[Route('/offres', name: 'offer_index')]
     public function index(Request $request, OfferRepository $offerRepository): Response
     {
-        // Formulaire de recherche en GET
         $form = $this->createForm(SearchOfferType::class, null, [
             'method' => 'GET',
         ]);
@@ -30,7 +30,6 @@ class OfferController extends AbstractController
         $skillRequested = $form->get('skillRequested')->getData();
         $q              = $form->get('q')->getData();
 
-        // Utilisation de la bonne méthode du repository
         $result = $offerRepository->findByFiltersPaginated(
             $skillOffered,
             $skillRequested,
@@ -43,7 +42,6 @@ class OfferController extends AbstractController
         $total  = $result['total'];
         $pages  = $result['pages'];
 
-        // Requête AJAX ⇒ renvoyer uniquement la liste (fragment)
         if ($request->isXmlHttpRequest()) {
             return $this->render('offer/_offers_list.html.twig', [
                 'offers' => $offers,
@@ -53,14 +51,13 @@ class OfferController extends AbstractController
             ]);
         }
 
-        // Requête classique ⇒ page complète
         return $this->render('offer/index.html.twig', [
-            'offers' => $offers,
-            'form'       => $form->createView(), 
+            'offers'     => $offers,
+            'form'       => $form->createView(),
             'searchForm' => $form->createView(),
-            'page'   => $page,
-            'pages'  => $pages,
-            'total'  => $total,
+            'page'       => $page,
+            'pages'      => $pages,
+            'total'      => $total,
         ]);
     }
 
@@ -71,7 +68,6 @@ class OfferController extends AbstractController
 
         $offer = new Offer();
         $offer->setOwner($this->getUser());
-        // adapte si tu utilises un enum Status
         $offer->setStatus('active');
 
         $form = $this->createForm(OfferType::class, $offer);
@@ -106,5 +102,37 @@ class OfferController extends AbstractController
         }
 
         return $this->redirectToRoute('offer_index');
+    }
+
+    //  NOUVEAU : afficher une offre + init/charger la conversation 
+    #[Route('/offres/{id}', name: 'offer_show', methods: ['GET'])]
+    public function show(
+        Offer $offer,
+        ConversationRepository $conversationRepository,
+        EntityManagerInterface $em
+    ): Response {
+        $conversation = null;
+        $user = $this->getUser();
+
+        // Uniquement si connecté ET que l'utilisateur n'est pas le propriétaire
+        if ($user && $user !== $offer->getOwner()) {
+            $conversation = $conversationRepository->findOneByOfferAndParticipant($offer, $user);
+
+            if (!$conversation) {
+                // Création "find-or-create" de la conversation
+                $conversation = (new \App\Entity\Conversation())
+                    ->setOffer($offer)
+                    ->setOwner($offer->getOwner())
+                    ->setParticipant($user);
+
+                $em->persist($conversation);
+                $em->flush();
+            }
+        }
+
+        return $this->render('offer/show.html.twig', [
+            'offer' => $offer,
+            'conversation' => $conversation, // peut rester null si non connecté ou si owner
+        ]);
     }
 }
