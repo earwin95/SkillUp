@@ -1,34 +1,162 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Log in!{% endblock %}
+{% block title %}Connexion - SkillUp{% endblock %}
 
 {% block body %}
-<form method="post">
-    {% if error %}
-        <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
-    {% endif %}
+  <section class="hero">
+    <h1 class="hero-title">
+      Connecte-toi à <span>SkillUp</span> 🔑
+    </h1>
+    <p class="hero-sub">
+      Retrouve tes échanges, tes offres et ta progression en un clin d’œil.
+    </p>
+  </section>
 
-    {% if app.user %}
-        <div class="mb-3">
-            You are logged in as {{ app.user.userIdentifier }}, <a href="{{ path('app_logout') }}">Logout</a>
-        </div>
-    {% endif %}
-
-    <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
-    <label for="inputEmail">Email</label>
-    <input type="email" value="{{ last_username }}" name="email" id="inputEmail" class="form-control" autocomplete="email" required autofocus>
-    <label for="inputPassword">Password</label>
-    <input type="password" name="password" id="inputPassword" class="form-control" autocomplete="current-password" required>
-    <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('authenticate') }}">
-
-    <div class="checkbox mb-3">
-        <label>
-            <input type="checkbox" name="_remember_me"> Remember me
-        </label>
+  {% if app.user %}
+    <div class="already">
+      Connecté en tant que <strong>{{ app.user.userIdentifier }}</strong>.
+      <a class="link" href="{{ path('app_logout') }}">Se déconnecter</a>
     </div>
+  {% endif %}
 
-    <button class="btn btn-lg btn-primary" type="submit">
-        Sign in
-    </button>
-</form>
+  <div class="form-card">
+    {# Erreur d’authentification #}
+    {% if error %}
+      <div class="alert-error">
+        {{ error.messageKey|trans(error.messageData, 'security') }}
+      </div>
+    {% endif %}
+
+    <form method="post" action="{{ path('app_login') }}">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+      <div class="field">
+        <label for="inputEmail">Adresse email</label>
+        <input
+          id="inputEmail"
+          name="email"
+          type="email"
+          value="{{ last_username|default('') }}"
+          autocomplete="email"
+          required
+          autofocus
+          placeholder="ex : jean.dupont@mail.com">
+      </div>
+
+      <div class="field">
+        <label for="inputPassword">Mot de passe</label>
+        <input
+          id="inputPassword"
+          name="password"
+          type="password"
+          autocomplete="current-password"
+          required
+          placeholder="Ton mot de passe">
+      </div>
+
+      <div class="field-inline">
+        <label class="checkbox">
+          <input type="checkbox" name="_remember_me"> <span>Se souvenir de moi</span>
+        </label>
+
+        {# Active si tu as une route de reset #}
+        {# <a class="link" href="{{ path('app_forgot_password_request') }}">Mot de passe oublié ?</a> #}
+      </div>
+
+      <button class="btn btn-primary w-full mt-3" type="submit">Se connecter</button>
+
+      <div class="divider">ou</div>
+
+      <a class="btn btn-ghost w-full" href="{{ path('app_register') }}">Créer un compte</a>
+    </form>
+  </div>
+
+  <style>
+    /* Carte du formulaire */
+    .form-card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:20px;
+      max-width:450px;
+      margin:24px auto;
+    }
+
+    /* Message déjà connecté */
+    .already{
+      background:#f1f5ff;
+      border:1px solid #dbe4ff;
+      color:#1e3a8a;
+      border-radius:10px;
+      padding:.75rem .9rem;
+      margin:14px 0;
+      font-weight:600;
+    }
+
+    /* Erreur */
+    .alert-error{
+      background:#fee2e2;
+      border:1px solid #fecaca;
+      color:#991b1b;
+      border-radius:10px;
+      padding:.75rem .9rem;
+      margin-bottom:12px;
+      font-weight:600;
+    }
+
+    /* Champs */
+    .field{ margin-bottom:14px; }
+    .field label{
+      font-weight:600; font-size:14px; color:var(--text);
+      margin-bottom:4px; display:inline-block;
+    }
+    .field input[type="email"],
+    .field input[type="password"]{
+      width:100%; padding:.7rem .9rem;
+      border-radius:10px; border:1px solid var(--border);
+      background:#f9fafb; transition:all .2s ease;
+    }
+    .field input:focus{
+      border-color:var(--primary); background:#fff;
+      box-shadow:0 0 0 4px var(--ring); outline:none;
+    }
+
+    /* Ligne remember + lien */
+    .field-inline{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:.75rem; margin:6px 0 10px;
+    }
+    .checkbox{ display:inline-flex; align-items:center; gap:.5rem; cursor:pointer; user-select:none; }
+    .checkbox input{ width:16px; height:16px; }
+
+    /* Boutons */
+    .btn{
+      display:inline-flex; justify-content:center; align-items:center;
+      padding:.7rem 1.2rem; border-radius:10px; font-weight:700; cursor:pointer;
+      border:1px solid transparent; transition:.2s ease; text-decoration:none;
+    }
+    .btn-primary{ background:var(--primary); color:#fff; border-color:var(--primary); }
+    .btn-primary:hover{ filter:brightness(.95); }
+    .btn-ghost{ background:transparent; color:var(--text); border:1px solid var(--border); }
+    .btn-ghost:hover{ background:#f6f7fb; }
+
+    .w-full{ width:100%; }
+    .mt-3{ margin-top:.75rem; }
+
+    /* Lien générique */
+    .link{ color:var(--primary); text-decoration:none; font-weight:700; }
+    .link:hover{ text-decoration:underline; }
+
+    /* Séparateur */
+    .divider{
+      display:flex; align-items:center; color:var(--muted);
+      font-size:12px; gap:.6rem; margin:10px 0;
+    }
+    .divider::before,.divider::after{
+      content:''; height:1px; background:var(--border); flex:1;
+    }
+
+    /* Hero utilise tes styles globaux (base.html.twig) */
+  </style>
 {% endblock %}

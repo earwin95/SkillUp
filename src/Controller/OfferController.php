@@ -56,7 +56,8 @@ class OfferController extends AbstractController
         // Requête classique ⇒ page complète
         return $this->render('offer/index.html.twig', [
             'offers' => $offers,
-            'form'   => $form->createView(),
+            'form'       => $form->createView(), 
+            'searchForm' => $form->createView(),
             'page'   => $page,
             'pages'  => $pages,
             'total'  => $total,

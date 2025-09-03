@@ -1,65 +1,141 @@
-{# Liste des offres + pagination #}
+{# templates/offer/_offers_list.html.twig #}
 
 {% if offers is not empty %}
-  {% for offer in offers %}
-    <div class="offer-card">
-      <h2>{{ offer.title }}</h2>
-      <p><strong>Proposée par :</strong>
-        {{ attribute(offer.owner, 'username') is defined and offer.owner.username ? offer.owner.username : offer.owner.email }}
-      </p>
-      <p><strong>Compétence proposée :</strong> {{ offer.skillOffered.name }}</p>
-      <p><strong>Compétence recherchée :</strong> {{ offer.skillRequested.name }}</p>
-      <p><strong>Description :</strong> {{ offer.description }}</p>
-      <p><strong>Status :</strong> {{ offer.status }}</p>
+  <section class="offers-grid">
+    {% for offer in offers %}
+      <article class="offer-card">
+        <header class="offer-head">
+          <h2 class="offer-title">{{ offer.title }}</h2>
 
-      {% if app.user and app.user.id == offer.owner.id %}
-        <form method="post" action="{{ path('offer_delete', {'id': offer.id}) }}" onsubmit="return confirm('Supprimer cette offre ?');">
-          <input type="hidden" name="_token" value="{{ csrf_token('delete_offer_' ~ offer.id) }}">
-          <button class="btn-delete">🗑 Supprimer</button>
-        </form>
-      {% endif %}
-    </div>
-  {% endfor %}
+          {% set hasCreatedAt = offer.createdAt is defined and offer.createdAt %}
+          {% if hasCreatedAt %}
+            <time class="offer-date" datetime="{{ offer.createdAt|date('c') }}">
+              {{ offer.createdAt|date('d/m/Y') }}
+            </time>
+          {% endif %}
+
+          <span class="offer-status {{ offer.status|lower }}">{{ offer.status|capitalize }}</span>
+        </header>
+
+        {% if offer.description %}
+          <p class="offer-desc">{{ offer.description }}</p>
+        {% endif %}
+
+        <div class="offer-meta">
+          <div class="meta">
+            <span class="meta-label">👤 Proposée par</span>
+            <span class="meta-value">
+              {{ attribute(offer.owner, 'username') is defined and offer.owner.username ? offer.owner.username : offer.owner.email }}
+            </span>
+          </div>
+
+          <div class="meta">
+            <span class="meta-label">🎯 Skill offert</span>
+            <span class="chip chip-offered">{{ offer.skillOffered.name }}</span>
+          </div>
+
+          <div class="meta">
+            <span class="meta-label">🔄 Skill recherché</span>
+            <span class="chip chip-requested">{{ offer.skillRequested.name }}</span>
+          </div>
+        </div>
+
+        {% if app.user and app.user.id == offer.owner.id %}
+          <form method="post"
+                action="{{ path('offer_delete', {'id': offer.id}) }}"
+                class="offer-actions"
+                onsubmit="return confirm('Supprimer cette offre ?');">
+            <input type="hidden" name="_token" value="{{ csrf_token('delete_offer_' ~ offer.id) }}">
+            <button class="btn-delete" type="submit" title="Supprimer l’offre">🗑 Supprimer</button>
+          </form>
+        {% endif %}
+      </article>
+    {% endfor %}
+  </section>
 {% else %}
-  <p>Aucune offre disponible pour le moment.</p>
+  <p class="offers-empty">Aucune offre disponible pour le moment.</p>
 {% endif %}
 
-{# --- Pagination --- #}
 {% if pages is defined and page is defined and pages > 1 %}
   <nav class="pagination" aria-label="Pagination">
     {% set prev = page - 1 %}
     {% if prev < 1 %}
-      <span class="disabled">« Précédent</span>
+      <span class="page-link disabled">« Précédent</span>
     {% else %}
-      <a href="{{ path('offer_index', app.request.query.all|merge({'page': prev})) }}" data-page="{{ prev }}">« Précédent</a>
+      <a class="page-link" href="{{ path('offer_index', app.request.query.all|merge({'page': prev})) }}" data-page="{{ prev }}">« Précédent</a>
     {% endif %}
 
     {% set start = page - 2 > 1 ? page - 2 : 1 %}
     {% set end = page + 2 < pages ? page + 2 : pages %}
 
     {% if start > 1 %}
-      <a href="{{ path('offer_index', app.request.query.all|merge({'page': 1})) }}" data-page="1">1</a>
-      {% if start > 2 %}<span>…</span>{% endif %}
+      <a class="page-link" href="{{ path('offer_index', app.request.query.all|merge({'page': 1})) }}" data-page="1">1</a>
+      {% if start > 2 %}<span class="page-gap">…</span>{% endif %}
     {% endif %}
 
     {% for p in start..end %}
       {% if p == page %}
-        <span class="active">{{ p }}</span>
+        <span class="page-link active">{{ p }}</span>
       {% else %}
-        <a href="{{ path('offer_index', app.request.query.all|merge({'page': p})) }}" data-page="{{ p }}">{{ p }}</a>
+        <a class="page-link" href="{{ path('offer_index', app.request.query.all|merge({'page': p})) }}" data-page="{{ p }}">{{ p }}</a>
       {% endif %}
     {% endfor %}
 
     {% if end < pages %}
-      {% if end < pages - 1 %}<span>…</span>{% endif %}
-      <a href="{{ path('offer_index', app.request.query.all|merge({'page': pages})) }}" data-page="{{ pages }}">{{ pages }}</a>
+      {% if end < pages - 1 %}<span class="page-gap">…</span>{% endif %}
+      <a class="page-link" href="{{ path('offer_index', app.request.query.all|merge({'page': pages})) }}" data-page="{{ pages }}">{{ pages }}</a>
     {% endif %}
 
     {% set next = page + 1 %}
     {% if next > pages %}
-      <span class="disabled">Suivant »</span>
+      <span class="page-link disabled">Suivant »</span>
     {% else %}
-      <a href="{{ path('offer_index', app.request.query.all|merge({'page': next})) }}" data-page="{{ next }}">Suivant »</a>
+      <a class="page-link" href="{{ path('offer_index', app.request.query.all|merge({'page': next})) }}" data-page="{{ next }}">Suivant »</a>
     {% endif %}
   </nav>
 {% endif %}
+
+<style>
+  .offers-grid{ display:grid; grid-template-columns:1fr; gap:14px; }
+  @media (min-width:700px){ .offers-grid{ grid-template-columns: repeat(2,1fr); } }
+  @media (min-width:1060px){ .offers-grid{ grid-template-columns: repeat(3,1fr); } }
+
+  .offer-card{ background:var(--panel); border:1px solid var(--panel-border); border-radius:14px; padding:14px;
+               box-shadow:0 10px 24px rgba(15,23,42,.06); transition:transform .06s, box-shadow .15s, border-color .15s; }
+  .offer-card:hover{ transform:translateY(-1px); border-color:rgba(99,102,241,.35); box-shadow:0 18px 36px rgba(15,23,42,.08); }
+
+  .offer-head{ display:grid; grid-template-columns:1fr auto auto; align-items:center; gap:10px; margin-bottom:6px; }
+  .offer-title{ margin:0; font-size:16.5px; font-weight:800; color:var(--ink); letter-spacing:.2px; }
+  .offer-date{ font-size:12px; color:var(--muted); padding:2px 8px; border-radius:999px; border:1px solid var(--panel-border);
+               background:rgba(127,127,127,.06); white-space:nowrap; }
+  .offer-status{ font-size:12px; padding:3px 9px; border-radius:999px; border:1px solid var(--panel-border); white-space:nowrap; }
+  .offer-status.active{ background:rgba(16,185,129,.12); color:#059669; border-color:rgba(16,185,129,.25); }
+  .offer-status.closed, .offer-status.inactive{ background:rgba(239,68,68,.12); color:#dc2626; border-color:rgba(239,68,68,.25); }
+
+  .offer-desc{ margin:6px 0 10px; color:var(--ink); opacity:.9; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+
+  .offer-meta{ display:grid; grid-template-columns:1fr; gap:8px; }
+  @media (min-width:560px){ .offer-meta{ grid-template-columns:1fr 1fr; } }
+  .meta{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .meta-label{ color:var(--muted); font-size:13px; white-space:nowrap; }
+  .meta-value{ font-weight:700; color:var(--ink); }
+
+  .chip{ display:inline-block; padding:4px 10px; border-radius:999px; font-weight:700; font-size:12.5px; border:1px solid transparent; background:#f3f4f6; color:#111827; }
+  .chip-offered{ background:linear-gradient(90deg,#eaf2ff,#e6fffb); border-color:#c7dcff; color:#1f2a44; }
+  .chip-requested{ background:linear-gradient(90deg,#fff0f3,#fef3c7); border-color:#ffd1db; color:#3a1f2a; }
+
+  .offer-actions{ display:flex; justify-content:flex-end; margin-top:10px; }
+  .btn-delete{ background:linear-gradient(90deg,#ef4444,#f97316); border:none; color:#fff; padding:.45rem .8rem; border-radius:10px; cursor:pointer;
+               font-weight:800; transition:transform .06s, filter .15s, box-shadow .15s; }
+  .btn-delete:hover{ filter:brightness(1.05); box-shadow:0 8px 16px rgba(249,115,22,.28); }
+  .btn-delete:active{ transform:translateY(1px); }
+
+  .offers-empty{ margin:12px 0; color:var(--muted); }
+
+  .pagination{ display:flex; gap:.4rem; flex-wrap:wrap; margin-top:14px; align-items:center; justify-content:center; }
+  .page-link, .pagination .disabled{ display:inline-block; padding:.45rem .7rem; border-radius:10px; text-decoration:none; border:1px solid var(--panel-border); background:var(--panel); color:var(--ink); transition:transform .06s, background .15s, border-color .15s; }
+  .page-link:hover{ background:#f6f7fb; border-color:#d7d7d9; }
+  .page-link.active{ border-color:#b9c8ff; background:linear-gradient(90deg,var(--primary),var(--primary-2)); color:#fff; font-weight:800; }
+  .pagination .disabled{ opacity:.55; pointer-events:none; }
+  .page-gap{ color:var(--muted); padding:0 .2rem; }
+</style>
