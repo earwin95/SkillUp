@@ -40,16 +40,11 @@ class SearchOfferType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            // on utilise ce formulaire en GET → pas de CSRF
             'csrf_protection' => false,
-            // tolère d’éventuels paramètres en plus dans l’URL
             'allow_extra_fields' => true,
         ]);
     }
 
-    /**
-     * Champ URL plat ?skillOffered=...&skillRequested=...&q=...
-     */
     public function getBlockPrefix(): string
     {
         return '';

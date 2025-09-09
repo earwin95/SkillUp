@@ -20,7 +20,7 @@ class OfferFixtures extends Fixture implements FixtureGroupInterface, DependentF
         $faker = Factory::create('fr_FR');
 
         $created = 0;
-        $seenCombos = []; // évite doublons (ownerId|offeredId|requestedId)
+        $seenCombos = []; // évite doublons 
 
         // utilitaires pour titres/descriptions crédibles
         $titlePatterns = [

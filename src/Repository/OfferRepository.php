@@ -55,7 +55,7 @@ class OfferRepository extends ServiceEntityRepository
             )->setParameter('q', '%'.$qNorm.'%');
         }
 
-        // Tri robuste : si "createdAt" n’existe pas, tri par id
+        // tri par id meme si createdAt n'existe pas
         $meta = $this->getEntityManager()->getClassMetadata(Offer::class);
         $sortField = $meta->hasField('createdAt') ? 'o.createdAt' : 'o.id';
         $qb->orderBy($sortField, 'DESC');
@@ -66,7 +66,7 @@ class OfferRepository extends ServiceEntityRepository
         $qb->setFirstResult(($page - 1) * $limit)
            ->setMaxResults($limit);
 
-        // Paginator sur la Query
+        // Paginator sur Query
         $paginator = new Paginator($qb->getQuery(), true);
         $total = count($paginator);
         $pages = (int) ceil($total / $limit);

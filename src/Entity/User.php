@@ -32,8 +32,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: Types::JSON)]
     private array $roles = [];
 
-    #[Assert\NotBlank]
-    #[Assert\Length(min: 8)]
+    // ⚠️ Ne pas mettre de contraintes ici : c'est le HASH final
     #[ORM\Column]
     private ?string $password = null;
 
@@ -116,7 +115,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function eraseCredentials(): void
     {
-        // $this->plainPassword = null;
+        // Si tu ajoutes un plainPassword temporaire, nettoie-le ici.
     }
 
     public function getUsername(): ?string

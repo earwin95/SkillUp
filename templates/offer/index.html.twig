@@ -3,42 +3,70 @@
 {% block title %}Liste des Offres{% endblock %}
 
 {% block body %}
-    <h1>📋 Liste des Offres</h1>
+  <h1 class="text-3xl font-bold text-white mb-6 flex items-center gap-2">
+    📋 Liste des Offres
+  </h1>
 
-    {# --- Formulaire de recherche par compétences (offerte + demandée) + mot-clé --- #}
+  <div class="bg-[#111827] border border-[#2c2f38] rounded-2xl shadow-lg p-6 max-w-5xl mx-auto mb-8">
+    <h2 class="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+      🎯 Filtres de recherche
+    </h2>
+
     {{ form_start(form, { method: 'GET' }) }}
-        <div class="offer-card">
-            <div class="filters">
-                <div class="filter-item">
-                    {{ form_row(form.skillOffered) }}
-                </div>
-                <div class="filter-item">
-                    {{ form_row(form.skillRequested) }}
-                </div>
-                <div class="filter-item filter-q">
-                    {{ form_row(form.q) }}
-                </div>
-            </div>
-
-            <div class="actions">
-                <button type="submit" class="btn-search">🔍 Rechercher</button>
-                <a href="{{ path('offer_index') }}" class="btn-reset">↩ Réinitialiser</a>
-            </div>
+      <div class="grid md:grid-cols-2 gap-6">
+        <div>
+          <label class="block text-sm text-gray-300 font-semibold mb-1">Compétence OFFERTE</label>
+          {{ form_widget(form.skillOffered, {
+            attr: {
+              class: 'w-full p-2.5 rounded-md bg-gray-800 border border-gray-600 text-white focus:ring focus:ring-blue-500'
+            }
+          }) }}
         </div>
+
+        <div>
+          <label class="block text-sm text-gray-300 font-semibold mb-1">Compétence DEMANDÉE</label>
+          {{ form_widget(form.skillRequested, {
+            attr: {
+              class: 'w-full p-2.5 rounded-md bg-gray-800 border border-gray-600 text-white focus:ring focus:ring-blue-500'
+            }
+          }) }}
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="block text-sm text-gray-300 font-semibold mb-1">Mot-clé</label>
+          {{ form_widget(form.q, {
+            attr: {
+              class: 'w-full p-2.5 rounded-md bg-gray-800 border border-gray-600 text-white',
+              placeholder: 'Mot-clé (titre, description ou compétence)'
+            }
+          }) }}
+        </div>
+      </div>
+
+      <div class="flex flex-wrap gap-4 mt-6">
+        <button type="submit" class="px-5 py-2.5 bg-green-500 text-white font-bold rounded-md hover:bg-green-600 transition-all">
+          🔍 Rechercher
+        </button>
+
+        <a href="{{ path('offer_index') }}" class="px-5 py-2.5 bg-gray-700 text-white font-semibold rounded-md hover:bg-gray-600 transition-all btn-reset">
+          ↩ Réinitialiser
+        </a>
+      </div>
     {{ form_end(form) }}
+  </div>
 
-    <hr style="margin: 2rem 0;">
+  <hr class="my-8 border-gray-600">
 
-    <div id="offers-container">
-        {# Liste initiale (serveur) #}
-        {% include 'offer/_offers_list.html.twig' with {
-            offers: offers,
-            page: page,
-            pages: pages,
-            total: total
-        } %}
-    </div>
+  <div id="offers-container">
+    {% include 'offer/_offers_list.html.twig' with {
+      offers: offers,
+      page: page,
+      pages: pages,
+      total: total
+    } %}
+  </div>
 {% endblock %}
+
 
 {% block stylesheets %}
 <style>

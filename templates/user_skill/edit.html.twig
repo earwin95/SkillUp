@@ -1,25 +1,118 @@
 {% extends 'base.html.twig' %}
-{% block title %}Modifier une compétence{% endblock %}
+{% block title %}Modifier une compétence - SkillUp{% endblock %}
 
 {% block body %}
-<h1>Modifier la compétence</h1>
+  <section class="hero">
+    <h1 class="hero-title">✏️ Modifier la <span>compétence</span></h1>
+    <p class="hero-sub">Ajuste ton niveau ou tes notes pour tenir ton profil à jour.</p>
+  </section>
 
-{% for label, messages in app.flashes %}
-  {% for message in messages %}
-    <div class="flash-{{ label }}">{{ message }}</div>
-  {% endfor %}
-{% endfor %}
+  <div class="form-card">
+    {# Flash messages #}
+    {% for label, messages in app.flashes %}
+      {% for message in messages %}
+        <div class="form-flash {{ label }}">{{ message }}</div>
+      {% endfor %}
+    {% endfor %}
 
-{{ form_start(form) }}
-  {# Dans le contrôleur, on a passé 'disable_skill' => true, le champ est donc désactivé #}
-  {{ form_row(form.skill) }}
-  {{ form_row(form.level) }}
-  {{ form_row(form.notes) }}
-  <button class="btn btn-primary">💾 Enregistrer</button>
-{{ form_end(form) }}
+    {{ form_start(form) }}
+      {# Dans le contrôleur, on peut passer 'disable_skill' => true pour rendre le champ en lecture seule #}
+      {{ form_row(form.skill, {
+        label: 'Compétence',
+        attr: {'readonly': (form.vars.attr.disable_skill ?? false) ? true : null, 'disabled': (form.vars.attr.disable_skill ?? false) ? true : null}
+      }) }}
 
-<p class="mt-3">
-  <a class="btn btn-outline-secondary" href="{{ path('app_user_skills_index') }}">← Mes compétences</a>
-  <a class="btn btn-secondary" href="{{ path('app_home') }}">🏠 Accueil</a>
-</p>
+      {{ form_row(form.level, { label: 'Niveau' }) }}
+      {{ form_row(form.notes, { label: 'Notes complémentaires' }) }}
+
+      <button type="submit" class="btn btn-primary w-full mt-3">💾 Enregistrer</button>
+    {{ form_end(form) }}
+  </div>
+
+  <div class="nav-links">
+    <a class="btn btn-outline" href="{{ path('app_user_skills_index') }}">← Mes compétences</a>
+    <a class="btn btn-secondary" href="{{ path('app_home') }}">🏠 Accueil</a>
+  </div>
+
+  <style>
+    .form-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 20px;
+      max-width: 500px;
+      margin: 24px auto;
+    }
+
+    .form-card label {
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--text);
+      margin-bottom: 4px;
+      display: inline-block;
+    }
+
+    .form-card input,
+    .form-card select,
+    .form-card textarea {
+      width: 100%;
+      padding: .7rem .9rem;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #f9fafb;
+      margin-bottom: 14px;
+      transition: all .2s ease;
+      color: var(--text);
+    }
+
+    .form-card input:focus,
+    .form-card select:focus,
+    .form-card textarea:focus {
+      border-color: var(--primary);
+      background: #fff;
+      box-shadow: 0 0 0 4px var(--ring);
+      outline: none;
+    }
+
+    .form-card .btn {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      padding: .7rem 1.2rem;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+    .form-card .btn-primary {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+    }
+    .form-card .btn-primary:hover {
+      filter: brightness(.95);
+    }
+
+    .form-flash {
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      font-size: 14px;
+      border:1px solid transparent;
+    }
+    .form-flash.success { background:#ecfdf5; color:#065f46; border-color:#34d399; }
+    .form-flash.error   { background:#fef2f2; color:#991b1b; border-color:#fca5a5; }
+    .form-flash.warning { background:#fffbeb; color:#92400e; border-color:#fcd34d; }
+    .form-flash.info    { background:#eff6ff; color:#1e3a8a; border-color:#93c5fd; }
+
+    .nav-links {
+      display: flex; justify-content: center; gap: 10px; margin-top: 16px;
+    }
+    .btn { display:inline-flex; align-items:center; justify-content:center; padding:.55rem .9rem; border-radius:10px; font-weight:700; border:1px solid transparent; }
+    .btn-outline { border-color: var(--border); color: var(--text); background: transparent; }
+    .btn-outline:hover { background: var(--border); }
+    .btn-secondary { background:#e5e7eb; color:#111; }
+    .btn-secondary:hover { filter: brightness(.97); }
+  </style>
 {% endblock %}

@@ -14,18 +14,34 @@
 
   <div class="form-card">
     {{ form_start(registrationForm) }}
-      
+
+      {# — Erreurs globales du formulaire (ex: email déjà utilisé) — #}
+      {{ form_errors(registrationForm) }}
+
       {{ form_row(registrationForm.email, {
-        label: 'Adresse email'
+        label: 'Adresse email',
+        attr: { autocomplete: 'email', placeholder: 'ex. jean.dupont@mail.com' }
+      }) }}
+
+      {{ form_row(registrationForm.username, {
+        label: "Nom d'utilisateur",
+        attr: { autocomplete: 'username', placeholder: 'ex. jean_du67' }
       }) }}
 
       {{ form_row(registrationForm.plainPassword, {
-        label: 'Mot de passe'
+        label: 'Mot de passe',
+        attr: { autocomplete: 'new-password', placeholder: '••••••••' }
       }) }}
 
-      {{ form_row(registrationForm.agreeTerms, {
-        label: 'J’accepte les conditions générales'
-      }) }}
+      <div class="checkbox-row">
+        {{ form_widget(registrationForm.agreeTerms, {
+          attr: { class: 'checkbox-input' }
+        }) }}
+        <label for="{{ registrationForm.agreeTerms.vars.id }}" class="checkbox-label">
+          J’accepte les conditions générales
+        </label>
+        {{ form_errors(registrationForm.agreeTerms) }}
+      </div>
 
       <button type="submit" class="btn btn-primary w-full mt-3">🚀 S’inscrire</button>
 
@@ -52,6 +68,7 @@
     }
 
     .form-card input[type="email"],
+    .form-card input[type="text"],
     .form-card input[type="password"] {
       width: 100%;
       padding: .7rem .9rem;
@@ -60,6 +77,7 @@
       background: #f9fafb;
       margin-bottom: 14px;
       transition: all .2s ease;
+      color: var(--text);
     }
 
     .form-card input:focus {
@@ -79,15 +97,58 @@
       cursor: pointer;
       transition: 0.2s ease;
     }
-
     .form-card .btn-primary {
       background: var(--primary);
       color: #fff;
       border: none;
     }
-
     .form-card .btn-primary:hover {
       filter: brightness(.95);
+    }
+
+    /* Checkbox custom pour rester dans ton design */
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      margin: 6px 0 14px;
+    }
+    .checkbox-input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+    .checkbox-label {
+      font-size: 14px;
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    /* Erreurs Symfony intégrées, harmonisées avec ta carte */
+    .form-error-message,
+    .form-error-icon {
+      display: none; /* on masque l’icône par défaut si thème bootstrap n’est pas utilisé */
+    }
+    .form-error {
+      color: #b42318;
+      background: #fef3f2;
+      border: 1px solid #fecdca;
+      padding: 8px 10px;
+      border-radius: 8px;
+      margin: 6px 0 12px;
+      font-size: 13px;
+    }
+    /* Si tu utilises form_row, Symfony met les erreurs juste sous le champ :
+       on force un style cohérent via le sélecteur classique */
+    .form-card .form-error-message,
+    .form-card .invalid-feedback,
+    .form-card ul.form-errors {
+      color: #b42318;
+      margin: 6px 0 0;
+      font-size: 13px;
+      list-style: none;
+      padding-left: 0;
     }
   </style>
 {% endblock %}

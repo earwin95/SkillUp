@@ -1,51 +1,145 @@
 {% extends 'base.html.twig' %}
-{% block title %}Mes compétences{% endblock %}
+{% block title %}Mes compétences - SkillUp{% endblock %}
 
 {% block body %}
-<h1>Mes compétences</h1>
+  <section class="hero">
+    <h1 class="hero-title">🧰 Mes <span>compétences</span></h1>
+    <p class="hero-sub">Gère tes compétences pour enrichir ton profil et mieux matcher avec les offres.</p>
+  </section>
 
-{% for label, messages in app.flashes %}
-  {% for message in messages %}
-    <div class="flash-{{ label }}">{{ message }}</div>
-  {% endfor %}
-{% endfor %}
+  <div class="toolbar">
+    <a class="btn btn-primary" href="{{ path('app_user_skills_new') }}">➕ Ajouter une compétence</a>
+    <a class="btn btn-secondary" href="{{ path('app_home') }}">🏠 Accueil</a>
+  </div>
 
-<p class="mb-3">
-  <a class="btn btn-primary" href="{{ path('app_user_skills_new') }}">➕ Ajouter une compétence</a>
-  <a class="btn btn-secondary" href="{{ path('app_home') }}">🏠 Accueil</a>
-</p>
+  {# Flash messages #}
+  <div class="flash-wrap">
+    {% for label, messages in app.flashes %}
+      {% for message in messages %}
+        <div class="form-flash {{ label }}">{{ message }}</div>
+      {% endfor %}
+    {% endfor %}
+  </div>
 
-<table class="table">
-  <thead>
-    <tr>
-      <th>Compétence</th>
-      <th>Niveau</th>
-      <th>Notes</th>
-      <th>Actions</th>
-    </tr>
-  </thead>
-  <tbody>
-  {% for us in mySkills %}
-    <tr>
-      <td>{{ us.skill.name }}</td>
-      {# Enum PHP BackedEnum -> on affiche la "value" (beginner/intermediate/...) #}
-      <td>{{ us.level.value }}</td>
-      <td>{{ us.notes ?: '—' }}</td>
-      <td>
-        <a class="btn btn-sm btn-secondary" href="{{ path('app_user_skills_edit', {id: us.id}) }}">✏️ Modifier</a>
-        <form method="post" action="{{ path('app_user_skills_delete', {id: us.id}) }}" style="display:inline" onsubmit="return confirm('Supprimer ?');">
-          <input type="hidden" name="_token" value="{{ csrf_token('delete_user_skill_' ~ us.id) }}">
-          <button class="btn btn-sm btn-danger">🗑️ Supprimer</button>
-        </form>
-      </td>
-    </tr>
-  {% else %}
-    <tr><td colspan="4">Aucune compétence pour le moment.</td></tr>
-  {% endfor %}
-  </tbody>
-</table>
+  <div class="card">
+    {% if mySkills is empty %}
+      <div class="empty">
+        <p>Aucune compétence pour le moment.</p>
+        <a class="btn btn-primary" href="{{ path('app_user_skills_new') }}">➕ Ajouter ma première compétence</a>
+      </div>
+    {% else %}
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Compétence</th>
+              <th>Niveau</th>
+              <th>Notes</th>
+              <th class="actions-th">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for us in mySkills %}
+              <tr>
+                <td data-label="Compétence">{{ us.skill.name }}</td>
+                <td data-label="Niveau">{{ us.level.value }}</td>
+                <td data-label="Notes">{{ us.notes ?: '—' }}</td>
+                <td class="actions">
+                  <a class="btn btn-sm btn-secondary" href="{{ path('app_user_skills_edit', {id: us.id}) }}">✏️ Modifier</a>
 
-<p class="mt-3">
-  <a class="btn btn-secondary" href="{{ path('app_home') }}">🏠 Retour à l’accueil</a>
-</p>
+                  <form method="post"
+                        action="{{ path('app_user_skills_delete', {id: us.id}) }}"
+                        onsubmit="return confirm('Supprimer cette compétence ?');">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete_user_skill_' ~ us.id) }}">
+                    <button class="btn btn-sm btn-danger" type="submit">🗑️ Supprimer</button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% endif %}
+  </div>
+
+  <style>
+    .toolbar{
+      max-width: 1100px; margin: 0 auto 16px; display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-start;
+    }
+
+    .card{
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+      max-width: 1100px;
+      margin: 0 auto 24px;
+    }
+
+    .flash-wrap{ max-width:1100px; margin:0 auto 12px; }
+    .form-flash {
+      padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 14px; border:1px solid transparent;
+    }
+    .form-flash.success { background:#ecfdf5; color:#065f46; border-color:#34d399; }
+    .form-flash.error   { background:#fef2f2; color:#991b1b; border-color:#fca5a5; }
+    .form-flash.warning { background:#fffbeb; color:#92400e; border-color:#fcd34d; }
+    .form-flash.info    { background:#eff6ff; color:#1e3a8a; border-color:#93c5fd; }
+
+    .table-wrap{ width:100%; overflow:auto; }
+    .table{
+      width:100%; border-collapse: collapse; font-size:14px;
+    }
+    .table th, .table td{
+      padding: 12px 10px; border-bottom:1px solid var(--border);
+      color: var(--text);
+    }
+    .table thead th{
+      text-align:left; font-weight:700; font-size:13px; text-transform: uppercase; letter-spacing:.02em; color: var(--muted-text, #6b7280);
+      background: var(--card-subtle, #fafafa);
+    }
+    .actions-th{ width: 220px; }
+
+    .actions{
+      display:flex; gap:8px; align-items:center;
+    }
+    .actions form{ display:inline; }
+
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center;
+      padding: .55rem .9rem; border-radius:10px; font-weight:700; cursor:pointer; transition:.2s ease;
+      border:1px solid transparent;
+    }
+    .btn-primary{ background: var(--primary); color:#fff; }
+    .btn-primary:hover{ filter: brightness(.95); }
+
+    .btn-secondary{ background:#e5e7eb; color:#111; }
+    .btn-secondary:hover{ filter:brightness(.97); }
+
+    .btn-sm{ padding:.4rem .6rem; border-radius:8px; font-weight:600; font-size:13px; }
+    .btn-danger{ background:#ef4444; color:#fff; }
+    .btn-danger:hover{ filter:brightness(.95); }
+
+    .empty{
+      display:flex; flex-direction:column; align-items:center; gap:10px; padding:24px 10px; text-align:center;
+      color: var(--text);
+    }
+
+    /* Responsive : table en "cartes" sur petits écrans */
+    @media (max-width: 720px){
+      .table thead{ display:none; }
+      .table tr{
+        display:block; border:1px solid var(--border); border-radius:12px; padding:10px; margin-bottom:10px; background: #fff;
+      }
+      .table td{
+        display:flex; justify-content:space-between; align-items:center; border:none; padding:8px 6px;
+      }
+      .table td::before{
+        content: attr(data-label);
+        font-weight:700; margin-right:10px; color: var(--muted-text, #6b7280);
+      }
+      .actions{ justify-content:flex-end; gap:6px; }
+      .actions-th{ width:auto; }
+    }
+  </style>
 {% endblock %}

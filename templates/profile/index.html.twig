@@ -3,29 +3,56 @@
 {% block title %}Mon Profil{% endblock %}
 
 {% block body %}
-    <div class="max-w-2xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-xl">
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-bold text-gray-800">Mon profil</h1>
-            <a href="{{ path('app_home') }}" class="text-blue-600 hover:underline">
-                ← Retour à l'accueil
-            </a>
-        </div>
-
-        <div class="space-y-4 text-gray-700">
-            <p><span class="font-semibold">Email :</span> {{ app.user.email }}</p>
-            <p><span class="font-semibold">Nom d'utilisateur :</span> {{ app.user.username }}</p>
-
-            {% if app.user.bio %}
-                <p><span class="font-semibold">Bio :</span> {{ app.user.bio }}</p>
-            {% else %}
-                <p><span class="font-semibold">Bio :</span> Aucune bio pour l’instant.</p>
-            {% endif %}
-        </div>
-
-        <div class="mt-6 text-right">
-            <a href="{{ path('app_profile_edit') }}" class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
-                ✏️ Modifier le profil
-            </a>
-        </div>
+<div class="max-w-2xl mx-auto mt-12 p-8 bg-white/90 shadow-xl rounded-2xl">
+    
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-8">
+        <h1 class="text-3xl font-extrabold text-gray-800 flex items-center gap-2">
+            👤 Mon profil
+        </h1>
+        <a href="{{ path('app_home') }}" 
+           class="text-blue-600 hover:text-blue-800 transition">
+            ← Retour à l'accueil
+        </a>
     </div>
+
+    <!-- Infos utilisateur -->
+    <div class="text-gray-700 space-y-3 mb-8">
+        <p><span class="font-semibold">📧 Email :</span> {{ app.user.email }}</p>
+        <p><span class="font-semibold">👤 Nom d'utilisateur :</span> {{ app.user.username ?: 'Non défini' }}</p>
+        {% if app.user.bio %}
+            <p><span class="font-semibold">📝 Bio :</span> {{ app.user.bio }}</p>
+        {% else %}
+            <p><span class="font-semibold">📝 Bio :</span> 
+               <span class="italic text-gray-500">Aucune bio pour l’instant</span>
+            </p>
+        {% endif %}
+    </div>
+
+    <!-- Actions -->
+    <div class="mt-8">
+      <div class="flex flex-wrap items-center gap-3">
+        {# Modifier le profil #}
+        <a href="{{ path('app_profile_edit') }}"
+           class="inline-flex items-center justify-center no-underline 
+                  !bg-blue-600 hover:!bg-blue-700 active:!bg-blue-800 
+                  !text-white !font-medium px-5 py-2 rounded-lg shadow 
+                  transition focus:outline-none focus:ring-2 focus:ring-blue-300">
+          ✏️ Modifier le profil
+        </a>
+
+        {# Pousse le bouton Déconnexion complètement à droite #}
+        <span class="ml-auto"></span>
+
+        {# Déconnexion #}
+        <a href="{{ path('app_logout') }}"
+           class="inline-flex items-center justify-center no-underline 
+                  !bg-red-600 hover:!bg-red-700 active:!bg-red-800 
+                  !text-white !font-medium px-5 py-2 rounded-lg shadow 
+                  transition focus:outline-none focus:ring-2 focus:ring-red-300">
+          🚪 Déconnexion
+        </a>
+      </div>
+    </div>
+</div>
 {% endblock %}
