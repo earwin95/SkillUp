@@ -3,264 +3,274 @@
 {% block title %}Liste des Offres{% endblock %}
 
 {% block body %}
-  <h1 class="text-3xl font-bold text-white mb-6 flex items-center gap-2">
-    📋 Liste des Offres
-  </h1>
+  <div class="max-w-5xl mx-auto">
 
-  <div class="bg-[#111827] border border-[#2c2f38] rounded-2xl shadow-lg p-6 max-w-5xl mx-auto mb-8">
-    <h2 class="text-2xl font-bold text-white mb-6 flex items-center gap-2">
-      🎯 Filtres de recherche
-    </h2>
+    <!-- Header + CTA -->
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="text-3xl font-bold text-white flex items-center gap-2">
+        📋 Liste des Offres
+      </h1>
 
-    {{ form_start(form, { method: 'GET' }) }}
-      <div class="grid md:grid-cols-2 gap-6">
-        <div>
-          <label class="block text-sm text-gray-300 font-semibold mb-1">Compétence OFFERTE</label>
-          {{ form_widget(form.skillOffered, {
-            attr: {
-              class: 'w-full p-2.5 rounded-md bg-gray-800 border border-gray-600 text-white focus:ring focus:ring-blue-500'
-            }
-          }) }}
-        </div>
-
-        <div>
-          <label class="block text-sm text-gray-300 font-semibold mb-1">Compétence DEMANDÉE</label>
-          {{ form_widget(form.skillRequested, {
-            attr: {
-              class: 'w-full p-2.5 rounded-md bg-gray-800 border border-gray-600 text-white focus:ring focus:ring-blue-500'
-            }
-          }) }}
-        </div>
-
-        <div class="md:col-span-2">
-          <label class="block text-sm text-gray-300 font-semibold mb-1">Mot-clé</label>
-          {{ form_widget(form.q, {
-            attr: {
-              class: 'w-full p-2.5 rounded-md bg-gray-800 border border-gray-600 text-white',
-              placeholder: 'Mot-clé (titre, description ou compétence)'
-            }
-          }) }}
-        </div>
-      </div>
-
-      <div class="flex flex-wrap gap-4 mt-6">
-        <button type="submit" class="px-5 py-2.5 bg-green-500 text-white font-bold rounded-md hover:bg-green-600 transition-all">
-          🔍 Rechercher
-        </button>
-
-        <a href="{{ path('offer_index') }}" class="px-5 py-2.5 bg-gray-700 text-white font-semibold rounded-md hover:bg-gray-600 transition-all btn-reset">
-          ↩ Réinitialiser
+      {% if app.user %}
+        <a href="{{ path('offer_new') }}"
+           class="px-4 py-2 rounded-md bg-blue-600 text-white font-semibold hover:bg-blue-500 transition">
+          ➕ Créer une offre
         </a>
-      </div>
-    {{ form_end(form) }}
-  </div>
+      {% endif %}
+    </div>
 
-  <hr class="my-8 border-gray-600">
+    <!-- Filtres -->
+    <div class="bg-[#111827] border border-[#2c2f38] rounded-2xl shadow-lg p-6 mb-8">
+      <h2 class="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+        🎯 Filtres de recherche
+      </h2>
 
-  <div id="offers-container">
-    {% include 'offer/_offers_list.html.twig' with {
-      offers: offers,
-      page: page,
-      pages: pages,
-      total: total
-    } %}
+      {{ form_start(form, { method: 'GET', action: path('offer_index'), attr: { id: 'search-form' } }) }}
+        <div class="grid md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm text-gray-300 font-semibold mb-1">Compétence OFFERTE</label>
+            {{ form_widget(form.skillOffered, {
+              attr: {
+                class: 'w-full p-2.5 rounded-md bg-gray-800 border border-gray-600 text-white focus:ring focus:ring-blue-500'
+              }
+            }) }}
+          </div>
+
+          <div>
+            <label class="block text-sm text-gray-300 font-semibold mb-1">Compétence DEMANDÉE</label>
+            {{ form_widget(form.skillRequested, {
+              attr: {
+                class: 'w-full p-2.5 rounded-md bg-gray-800 border border-gray-600 text-white focus:ring focus:ring-blue-500'
+              }
+            }) }}
+          </div>
+
+          <div class="md:col-span-2">
+            <label class="block text-sm text-gray-300 font-semibold mb-1">Mot-clé</label>
+            {{ form_widget(form.q, {
+              attr: {
+                class: 'w-full p-2.5 rounded-md bg-gray-800 border border-gray-600 text-white',
+                placeholder: 'Mot-clé (titre, description ou compétence)',
+                'aria-label': 'Mot-clé'
+              }
+            }) }}
+          </div>
+        </div>
+
+        <div class="flex flex-wrap gap-4 mt-6">
+          <button type="submit"
+                  class="px-5 py-2.5 bg-green-500 text-white font-bold rounded-md hover:bg-green-600 transition-all">
+            🔍 Rechercher
+          </button>
+
+          <a href="{{ path('offer_index') }}"
+             class="px-5 py-2.5 bg-gray-700 text-white font-semibold rounded-md hover:bg-gray-600 transition-all btn-reset">
+            ↩ Réinitialiser
+          </a>
+        </div>
+      {{ form_end(form) }}
+    </div>
+
+    <hr class="my-8 border-gray-600">
+
+    <!-- Contenu offres (rechargé en AJAX) -->
+    <div id="offers-container">
+      {% include 'offer/_offers_list.html.twig' with {
+        offers: offers,
+        page: page,
+        pages: pages,
+        total: total
+      } %}
+    </div>
   </div>
 {% endblock %}
 
-
 {% block stylesheets %}
 <style>
-    .offer-card {
-        background: #fff;
-        padding: 1rem;
-        border-radius: 8px;
-        box-shadow: 0 0 8px rgba(0,0,0,0.1);
-        margin-bottom: 1.5rem;
-    }
+  .offer-card {
+    background: #fff;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    margin-bottom: 1.5rem;
+  }
 
-    h1 {
-        font-size: 1.8rem;
-        margin-bottom: 1.5rem;
-    }
+  h1 { font-size: 1.8rem; margin-bottom: 0; }
+  h2 { margin-bottom: 0.5rem; color: #d1d5db; }
+  p  { margin: 0.3rem 0; }
 
-    h2 {
-        margin-bottom: 0.5rem;
-        color: #2c3e50;
-    }
+  .filters {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+  }
+  @media (min-width: 900px) {
+    .filters { grid-template-columns: 1fr 1fr 1fr; }
+  }
 
-    p { margin: 0.3rem 0; }
+  .actions {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    margin-top: 0.6rem;
+  }
 
-    .filters {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 0.8rem;
-    }
+  .btn-delete {
+    margin-top: 1rem;
+    background-color: #e74c3c;
+    color: white;
+    padding: 0.4rem 1rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  .btn-delete:hover { background-color: #c0392b; }
 
-    @media (min-width: 900px) {
-        .filters {
-            grid-template-columns: 1fr 1fr 1fr; /* Offerte | Demandée | Mot-clé */
-        }
-    }
+  .btn-search {
+    background-color: #3498db;
+    color: white;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .btn-search:hover { background-color: #2980b9; }
 
-    .actions {
-        display: flex;
-        gap: 0.6rem;
-        flex-wrap: wrap;
-        margin-top: 0.6rem;
-    }
+  .btn-reset {
+    background: #ecf0f1;
+    color: #2c3e50;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .btn-reset:hover { background: #d0d7dc; }
 
-    .btn-delete {
-        margin-top: 1rem;
-        background-color: #e74c3c;
-        color: white;
-        padding: 0.4rem 1rem;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-    }
-    .btn-delete:hover { background-color: #c0392b; }
+  select, .filter-q input[type="text"] {
+    padding: 0.4rem;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    width: 100%;
+  }
 
-    .btn-search {
-        background-color: #3498db;
-        color: white;
-        padding: 0.5rem 1rem;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        text-decoration: none;
-    }
-    .btn-search:hover { background-color: #2980b9; }
-
-    .btn-reset {
-        background: #ecf0f1;
-        color: #2c3e50;
-        padding: 0.5rem 1rem;
-        border-radius: 6px;
-        text-decoration: none;
-        display: inline-block;
-    }
-    .btn-reset:hover { background: #d0d7dc; }
-
-    select, .filter-q input[type="text"] {
-        padding: 0.4rem;
-        border-radius: 5px;
-        border: 1px solid #ccc;
-        width: 100%;
-    }
-
-    /* Pagination */
-    .pagination {
-        display: flex;
-        gap: .4rem;
-        flex-wrap: wrap;
-        margin-top: 1rem;
-        align-items: center;
-    }
-    .pagination a, .pagination span {
-        display: inline-block;
-        padding: .4rem .7rem;
-        border-radius: 6px;
-        text-decoration: none;
-        border: 1px solid #d7d7d7;
-        background: #fff;
-        color: #2c3e50;
-    }
-    .pagination .active {
-        border-color: #3498db;
-        background: #3498db;
-        color: #fff;
-        font-weight: 600;
-    }
-    .pagination .disabled {
-        opacity: .5;
-        pointer-events: none;
-    }
+  /* Pagination (dans le partial) */
+  .pagination {
+    display: flex;
+    gap: .4rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+    align-items: center;
+  }
+  .pagination a, .pagination span {
+    display: inline-block;
+    padding: .4rem .7rem;
+    border-radius: 6px;
+    text-decoration: none;
+    border: 1px solid #d7d7d7;
+    background: #fff;
+    color: #2c3e50;
+  }
+  .pagination .active {
+    border-color: #3498db;
+    background: #3498db;
+    color: #fff;
+    font-weight: 600;
+  }
+  .pagination .disabled {
+    opacity: .5;
+    pointer-events: none;
+  }
 </style>
 {% endblock %}
 
 {% block javascripts %}
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    const form = document.querySelector('form'); // le form de recherche
-    const container = document.getElementById('offers-container');
+  const form = document.getElementById('search-form');
+  const container = document.getElementById('offers-container');
 
-    if (!form || !container) return;
+  if (!form || !container) return;
 
-    function buildUrlWithParams(extraParams = {}) {
-        const url = new URL(form.getAttribute('action') || window.location.href, window.location.origin);
-        const formData = new FormData(form);
-        url.search = '';
-        for (const [key, value] of formData.entries()) {
-            if (value && value.toString().trim() !== '') {
-                url.searchParams.set(key, value.toString());
-            }
-        }
-        // page spécifique (pagination)
-        Object.entries(extraParams).forEach(([k, v]) => {
-            if (v === null || v === undefined || v === '') {
-                url.searchParams.delete(k);
-            } else {
-                url.searchParams.set(k, v);
-            }
-        });
-        return url;
+  function buildUrlWithParams(extraParams = {}) {
+    const base = form.getAttribute('action') || window.location.pathname;
+    const url  = new URL(base, window.location.origin);
+    const formData = new FormData(form);
+
+    // réinitialise la query
+    url.search = '';
+
+    for (const [key, value] of formData.entries()) {
+      if (value && value.toString().trim() !== '') {
+        url.searchParams.set(key, value.toString());
+      }
     }
-
-    async function fetchOffers(evt, extraParams = {}) {
-        if (evt) evt.preventDefault();
-
-        const url = buildUrlWithParams(extraParams);
-        const headers = new Headers({ 'X-Requested-With': 'XMLHttpRequest' });
-
-        container.setAttribute('aria-busy', 'true');
-        container.style.opacity = '0.6';
-
-        try {
-            const res = await fetch(url.toString(), { headers });
-            if (!res.ok) throw new Error('Erreur réseau');
-
-            const html = await res.text();
-            container.innerHTML = html;
-
-            // Mettre à jour l'URL de la page (utile pour partage/refresh)
-            window.history.replaceState({}, '', url.toString());
-        } catch (e) {
-            container.innerHTML = '<p style="color:#e74c3c;">Une erreur est survenue. Réessaie.</p>';
-            console.error(e);
-        } finally {
-            container.removeAttribute('aria-busy');
-            container.style.opacity = '1';
-        }
-    }
-
-    // Submit manuel
-    form.addEventListener('submit', (e) => fetchOffers(e, { page: 1 }));
-
-    // Auto-submit sur changement d'un filtre
-    form.addEventListener('change', (e) => {
-        if (e.target.tagName === 'BUTTON' || e.target.closest('.btn-reset')) return;
-        fetchOffers(e, { page: 1 });
+    // paramètres additionnels (ex: page)
+    Object.entries(extraParams).forEach(([k, v]) => {
+      if (v === null || v === undefined || v === '') {
+        url.searchParams.delete(k);
+      } else {
+        url.searchParams.set(k, v);
+      }
     });
 
-    // Bouton "Réinitialiser"
-    const resetLink = document.querySelector('.btn-reset');
-    if (resetLink) {
-        resetLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            form.reset();
-            fetchOffers(e, { page: 1 });
-        });
+    return url;
+  }
+
+  async function fetchOffers(evt, extraParams = {}) {
+    if (evt) evt.preventDefault();
+
+    const url = buildUrlWithParams(extraParams);
+    const headers = new Headers({ 'X-Requested-With': 'XMLHttpRequest' });
+
+    container.setAttribute('aria-busy', 'true');
+    container.style.opacity = '0.6';
+
+    try {
+      const res = await fetch(url.toString(), { headers });
+      if (!res.ok) throw new Error('Erreur réseau');
+
+      const html = await res.text();
+      container.innerHTML = html;
+
+      // met à jour l'URL (pratique pour le partage / refresh)
+      window.history.replaceState({}, '', url.toString());
+    } catch (e) {
+      container.innerHTML = '<p style="color:#e74c3c;">Une erreur est survenue. Réessaie.</p>';
+      console.error(e);
+    } finally {
+      container.removeAttribute('aria-busy');
+      container.style.opacity = '1';
     }
+  }
 
-    // Pagination AJAX (délégation d'événements)
-    container.addEventListener('click', (e) => {
-        const link = e.target.closest('a[data-page]');
-        if (!link) return;
+  // Submit manuel
+  form.addEventListener('submit', (e) => fetchOffers(e, { page: 1 }));
 
-        e.preventDefault();
-        const page = parseInt(link.getAttribute('data-page'), 10) || 1;
-        fetchOffers(e, { page });
+  // Auto-submit sur changement d'un filtre
+  form.addEventListener('change', (e) => {
+    if (e.target.tagName === 'BUTTON' || e.target.closest('.btn-reset')) return;
+    fetchOffers(e, { page: 1 });
+  });
+
+  // Bouton "Réinitialiser"
+  const resetLink = document.querySelector('.btn-reset');
+  if (resetLink) {
+    resetLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      form.reset();
+      fetchOffers(e, { page: 1 });
     });
+  }
+
+  // Pagination AJAX (délégation)
+  container.addEventListener('click', (e) => {
+    const link = e.target.closest('a[data-page]');
+    if (!link) return;
+    e.preventDefault();
+    const page = parseInt(link.getAttribute('data-page'), 10) || 1;
+    fetchOffers(e, { page });
+  });
 });
 </script>
 {% endblock %}

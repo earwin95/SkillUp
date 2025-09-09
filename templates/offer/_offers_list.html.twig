@@ -6,7 +6,7 @@
       <article class="offer-card">
         <header class="offer-head">
           <h2 class="offer-title">
-            {# 🔗 Lien vers la page détail + chat (par ID). Si tu utilises un slug, remplace { id: offer.id } par { slug: offer.slug } #}
+            {# 🔗 Détail de l’offre ; si tu as un slug, remplace { id: offer.id } par { slug: offer.slug } #}
             <a class="offer-title-link" href="{{ path('offer_show', { id: offer.id }) }}">{{ offer.title }}</a>
           </h2>
 
@@ -17,7 +17,8 @@
             </time>
           {% endif %}
 
-          <span class="offer-status {{ offer.status|lower }}">{{ offer.status|capitalize }}</span>
+          {% set status = offer.status is defined and offer.status ? offer.status : 'active' %}
+          <span class="offer-status {{ status|lower }}">{{ status|capitalize }}</span>
         </header>
 
         {% if offer.description %}
@@ -48,7 +49,7 @@
             💬 Voir & discuter
           </a>
 
-          {% if app.user and app.user.id == offer.owner.id %}
+          {% if app.user and (app.user.id == offer.owner.id or is_granted('ROLE_ADMIN')) %}
             <form method="post"
                   action="{{ path('offer_delete', {'id': offer.id}) }}"
                   onsubmit="return confirm('Supprimer cette offre ?');">
